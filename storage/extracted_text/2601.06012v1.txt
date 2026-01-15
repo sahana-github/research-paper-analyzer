@@ -1,0 +1,3556 @@
+Cooperative Differential
+GNSS Positioning:
+Estimators and Bounds
+Helena Calatrava, Student Member, IEEE
+Northeastern University, Boston, MA 02115, USA
+Daniel Medina, Senior Member, IEEE
+German Aerospace Center (DLR), Neustrelitz, Germany
+Pau Closas, Senior Member, IEEE
+Northeastern University, Boston, MA 02115, USA
+Abstract— In Differential GNSS (DGNSS) positioning, dif-
+ferencing measurements between a user and a reference station
+suppresses common-mode errors but also introduces reference-
+station noise, which fundamentally limits accuracy. This limitation
+is minor for high-grade stations but becomes significant when using
+reference infrastructure of mixed quality. This paper investigates
+how large-scale user cooperation can mitigate the impact of
+reference-station noise in conventional (non-cooperative) DGNSS
+systems. We develop a unified estimation framework for cooperative
+DGNSS (C-DGNSS) and cooperative real-time kinematic (C-RTK)
+positioning, and derive parameterized expressions for their Fisher
+information matrices as functions of network size, satellite geometry,
+and reference-station noise. This formulation enables theoretical
+analysis of estimation performance, identifying regimes where
+cooperation asymptotically restores the accuracy of DGNSS with
+an ideal (noise-free) reference. Simulations validate these theoretical
+findings.
+Index Terms—GNSS, Differential GNSS (DGNSS), Real-Time
+Kinematic (RTK), Cram´er-Rao Bound (CRB), Cooperative posi-
+tioning
+I. Introduction
+Global navigation satellite systems (GNSS) remains
+the cornerstone of outdoor navigation, providing globally
+accessible, reliable, and drift-free positioning capabili-
+ties [1]–[3]. However, standalone GNSS positioning offers
+only meter-level accuracy due to the limited precision
+Manuscript received XXXXX 00, 0000; revised XXXXX 00,
+0000; accepted XXXXX 00, 0000.
+This work was partially supported by the National Science Foundation
+under Awards 1845833, 2326559, and 2530870. (Corresponding author:
+Helena Calatrava).
+Helena Calatrava and Pau Closas are with Dept. of Electrical
+and Computer Eng., Northeastern University, Boston, MA (USA).
+E-mail: {calatrava.h, closas}@northeastern.edu. Daniel
+Medina is with the Institute of Communications and Navigation,
+German Aerospace Center (DLR), Neustrelitz, Germany. E-mail:
+daniel.ariasmedina@dlr.de.
+0018-9251 © 2025 IEEE
+Fig. 1: Overview of the cooperative DGNSS architecture considered in
+this work. Nearby users r ∈1, . . . , N transmit code (ρr) and carrier-
+phase (Φr) measurements to a CPC, which jointly processes them
+with base-station DGNSS corrections. Cooperation is centralized, base-
+station–anchored, and does not involve inter-user ranging.
+of code measurements and residual biases arising from
+imperfect orbit and atmospheric modeling [4, Ch. 21].
+While meter-level accuracy is sufficient for most con-
+sumer applications, emerging domains such as intelligent
+transportation systems and vehicle-to-everything (V2X)
+communications [5], [6] demand centimeter-level preci-
+sion [7], [8]. Precise point positioning (PPP) [4, Ch. 25]
+offers a means to achieve such accuracy by incorpo-
+rating precise orbit and clock corrections; however, its
+long convergence time limits its suitability for real-time
+applications [9], [10].
+Real-time precise positioning is enabled by differential
+GNSS (DGNSS) [4, Ch. 26]. In this architecture, profes-
+sionally maintained continuously operating reference sta-
+tions (CORSs) at surveyed locations [31, Ch. 6] broadcast
+corrections that mitigate errors common to both the ref-
+erence station and nearby user receivers [32]. Code-based
+DGNSS implementations rely exclusively on pseudorange
+measurements, typically achieving decimeter-level accu-
+racy. Further incorporating carrier-phase measurements,
+real-time kinematic (RTK) resolves integer ambiguities
+and enables centimeter-level precision [33, Ch. 2].
+Remarkably, most reference networks are proprietary
+and managed by national or private operators, prompting
+growing efforts to make precise positioning more widely
+accessible [34]. This includes the emergence of low-
+cost GNSS receivers supporting RTK- and PPP-level
+capabilities [35]–[37], efforts by commercial providers to
+broaden access to precise correction services [38], and
+public services offering openly accessible real-time PPP
+corrections. The latter includes CNES products [39] and
+the Galileo High Accuracy Service (HAS) [40].
+Within this ongoing democratization of precise posi-
+tioning, we identify achieving CORS-grade performance
+using low-cost reference infrastructure as a key research
+objective. While low-cost receivers reduce deployment
+costs, their limited hardware quality degrades the accuracy
+of DGNSS and RTK corrections. One approach to address
+this challenge is to leverage the growing availability
+This work has been submitted for possible publication.
+VOL. XX, No. XX
+XXXXX 2025
+1
+arXiv:2601.06012v1  [eess.SP]  9 Jan 2026
+TABLE I: Overview of representative GNSS cooperative positioning approaches by measurement source; see [11] for a broad survey. We focus
+on the C-DGNSS and C-RTK methodologies (blue row), which rely on GNSS measurements differenced with those of a surveyed base station,
+without using auxiliary sensing.
+Measurements
+Cooperation mechanism
+Georeferenced?
+GNSS-only [12]–[15], [15]–[17]
+Inter-user constraint formation via GNSS differencing
+(DGNSS-CP) to cancel common errors
+No, unless GNSS measurements are
+reused
+GNSS + inter-user sensing (e.g., ranges, coor-
+dinate differences) [18]–[21]
+Fusion of absolute GNSS information and inter-user
+constraints from auxiliary sensing
+Yes,
+through
+absolute
+(undiffer-
+enced) GNSS observations
+GNSS + reference information (e.g., proba-
+bilistic prior, surveyed station) [22]–[30]
+User-anchor constraint formation to cancel common
+errors
+Yes, typically through the reference
+entity
+of data-sharing infrastructures and employ cooperative
+positioning (CP) techniques [11] (see Sec. II for a brief
+review). When multiple receivers rely on a common
+reference station for DGNSS corrections, their differential
+observations become statistically correlated through the
+shared reference noise. Accounting for these correlations,
+which are particularly pronounced when low-cost refer-
+ence stations are used, enhances positioning accuracy.
+In this work, we adopt an estimation-theoretic per-
+spective to address the following questions: Can large-
+scale user cooperation compensate for the reference-
+station noise propagated through the differencing oper-
+ation in standard (non-cooperative) DGNSS? If so, under
+which conditions, and to what extent? The main contribu-
+tions of this paper, relative to our prior conference works
+in which the potential of this cooperative positioning
+approach was preliminarily explored [29], [30], are:
+• We present a unified estimation framework for coop-
+erative differential GNSS that integrates both code-
+and carrier-phase-based techniques and accounts for
+a reference station with arbitrary noise variance.
+• We provide a comprehensive theoretical analysis of
+the asymptotic performance of cooperative DGNSS
+(C-DGNSS) [30] and cooperative RTK (C-RTK) [29]
+based on the Fisher information matrix (FIM), and as
+a function of receiver count, satellite visibility, and
+measurement variance.
+• We validate the proposed framework through simula-
+tions representative of multi-user network scenarios,
+such as the one illustrated in Fig. 1.
+The remainder of this paper is organized as follows:
+Sec. II reviews related work; Sec. III formalizes the C-
+DGNSS and C-RTK methodologies; Sec. IV analyzes
+their theoretical performance limits; Sec. V presents the
+simulation results; and Sec. VI concludes the paper.
+II. Background on GNSS Cooperative Positioning
+This section outlines representative approaches to
+GNSS CP as summarized in Table I, and introduces
+the cooperative architecture considered in this work, as
+illustrated in Fig. 1.
+Interest in GNSS CP emerged in the early 2000s [41],
+driven by advances in wireless sensor networks and
+short-range communication technologies that enabled in-
+formation exchange among receivers [42]. Notably, CP
+was originally developed for mass-market and indoor
+environments, where external positioning infrastructure
+was scarce and devices had to rely on inter-receiver
+cooperation to overcome low SNR and limited transmitter
+availability [43], [44]. Since the late 2010s, renewed
+attention has been fueled by the availability of raw GNSS
+measurements on mass-market devices [15], [45]–[47]
+and the rise of V2X communications [48], [49].
+A well-established approach is DGNSS-CP [12]–[14],
+which operates without any reference by differencing the
+measurements of multiple receivers to cancel common-
+mode errors and infer inter-agent ranges [11, §IV.C].
+These cooperative ranges can then be incorporated as
+additional constraints in the PVT solver [15], [16], thereby
+improving absolute positioning for users with limited
+satellite visibility [15], [17].
+On the other hand, hybrid GNSS CP directly pro-
+cesses raw GNSS measurements while integrating relative
+information from independent ranging technologies [18],
+[19]. This includes inter-receiver ranges obtained from
+received signal strength (RSS) or time of arrival (TOA)
+measurements, with the former being highly sensitive to
+the environment. When implemented with ultra-wideband
+(UWB) technology, TOA ranging can achieve centimeter-
+level accuracy [50]. Remarkably, some works use vision-
+based or other relative-pose sensing modalities that pro-
+vide vector-valued constraints, substantially strengthening
+network observability [20]. Theoretical analysis of hybrid
+architectures was first formalized in [21], and [18] intro-
+duced the CDOP metric to demonstrate the benefits of
+increased network connectivity and geometric diversity.
+Some methods anchor network positioning to a global
+frame through reference points (also referred to as
+network anchors) or position initialization for selected
+users [22]–[24]. Our previous work introduced a mas-
+sive differentiation method [27], in which a target user
+forms differential measurements with neighboring re-
+ceivers whose positions are modeled via probabilistic
+priors, allowing these neighbors to act as virtual refer-
+ences. Under the assumption that such priors are zero-
+mean and hence unbiased, the method achieves asymp-
+totic DGNSS/RTK-level performance without requiring a
+physical base station [28].
+2
+This work has been submitted for possible publication.
+VOL. XX, No. XX
+XXXXX 2025
+C-DGNSS Model 
+Definition 1
+Unified Observation 
+Model (Table I) 
+and Performance 
+Bound (Table II)
+Remark 1
+Observation Model
+(Section III-A)
+Single User 
+III-A.2
+Full Network
+III-A.3
+Network DD
+III-A.5
+Network SD
+III-A.4
+C-RTK Estimator + Bound 
+III-B.2
+C-DGNSS Estimator + Bound 
+III-B.1
+Estimation Framework
+(Section III-B)
+C-RTK Model
+Definition 2
+Theoretical Performance Analysis
+(Section IV)
+Fig. 2: Overview of the derivation flow in Sec. III leading to a unified observation model and performance bound for C-DGNSS and C-RTK,
+summarized in Tables II and III. The resulting unified FIM formulation enables the theoretical analysis in Sec. IV, which constitutes the main
+contribution of this work. Solid arrows indicate section flow, while dashed arrows denote result reuse across derivations.
+Cooperative Differential GNSS Architecture: In
+this work, we consider a C-DGNSS [30] and C-RTK [29]
+architecture, where the network comprises one surveyed
+reference station (indexed by b) and N user receivers (in-
+dexed by r ∈{1, . . . , N}). The reference station observes
+a set of K satellites (indexed by s ∈{p, 1, . . . , K−1}),
+where p denotes the pivot satellite used for differencing.
+Each user receiver observes all or a subset of these
+satellites depending on visibility. Cooperation is real-
+ized through centralized processing: all receivers (and
+the reference station) share their raw code and carrier-
+phase measurements with a common central processing
+center (CPC), which performs joint state estimation. Im-
+portantly, there is no inter-user ranging; all differential
+measurements are formed between each user and the
+reference station, providing a shared differencing anchor
+and enabling explicit modeling of inter-measurement cor-
+relations across the network.
+Addressing multipath and non-line-of-sight (NLOS)
+effects in CP remains challenging, as these depend
+strongly on each user’s local geometry and environment,
+thus leading to largely uncorrelated measurements [11,
+§IV.B]. Map-aided [26] and machine-learning-based [51]
+methods show promise, with some exploiting spatial
+correlations among users in similar geometries [46] or
+benefiting from sensor integration [52]. This work instead
+targets the mitigation of atmospheric effects that are com-
+mon to all receivers and to the low-cost reference station
+operating under short-baseline conditions (typically <10
+km). Multipath, NLOS, privacy preservation [53], and
+time-synchronization issues [15] fall outside the scope
+of this paper. Robustness to outliers in the C-DGNSS
+framework is investigated in [54].
+III. Cooperative DGNSS and RTK Methodologies
+This section presents a unified estimation framework
+for the C-DGNSS and C-RTK methodologies under a
+reference station with arbitrary noise variance, covering
+their linearized observation models (Sec. III-A) as well
+as the associated estimation problem and performance
+bounds (Sec. III-B). The reader should refer to Fig. 2
+for an overview of this section.
+Notation: Bold lowercase and uppercase letters de-
+note vector- and matrix-valued quantities, respectively,
+while regular lowercase letters denote scalars. The all-
+ones vector is 1p ∈Rp; Ip is the p × p identity matrix;
+the matrices 1p,q, 0p,q ∈Rp×q contain ones and zeros,
+respectively, with the shorthand 1p ≜1p,p and 0p ≜0p,p;
+⊗is the Kronecker product; and ∇x(·) denotes the
+gradient w.r.t. x.
+A.
+Observation Models
+In this section, we formulate the C-DGNSS and C-
+RTK methodologies within a unified Gaussian model:
+y|θ ∼N(m(θ), Σ), θT = [ωT, zT],
+(1)
+where y ∈RMy represents the measurement vector,
+and θ ∈RMθ is the unknown (deterministic) parameter
+vector, composed of continuous parameters ω ∈RMω and
+integer parameters z ∈ZMz, such that Mθ = Mω + Mz.
+The function m(θ) ∈RMy and Σ ∈RMy×My are the
+measurement model mean and covariance.
+We adopt the following simplifying assumptions, until
+otherwise stated in Sec. IV-A:
+A1) All users r ∈{1, . . . , N} and the base station track
+the same set of K satellites s ∈{p, 1, . . . , K−1}.
+A2) The stochastic measurement models share a common
+structure across users.
+A3) Users are in close proximity, implying identical
+satellite–receiver line-of-sight (LOS) vectors across
+the network.
+We next derive the explicit forms of θ, m(θ), and Σ
+for the C-DGNSS and C-RTK models, as summarized
+in Table II. The derivation follows four steps, each
+detailed in Secs. III-A.2 through III-A.5: (1) definition
+and linearization of the single-user observation model;
+(2) introducing a compact notation to stack all network
+observations; (3) applying the single difference (SD)
+operator with respect to the reference station to obtain
+the C-DGNSS model (Definition 1); and (4) extending to
+the double difference (DD) case by selecting a reference
+satellite, yielding the C-RTK model (Definition 2). Note
+that expanded formulations are provided in Sec. S1 of the
+Supplemental Material.
+1.
+Definition of Cooperative Operators
+We first introduce three operators that compactly
+represent the stacking and differencing operations used in
+the subsequent derivations. Throughout this section, let m
+denote the dimension of the vector to which stacking or
+differencing has been applied. In practice, m is either the
+CALATRAVA ET AL.: ESTIMATORS AND BOUNDS FOR COOPERATIVE DIFFERENTIAL GNSS POSITIONING
+3
+number of satellites (for measurement differencing) or the
+state-vector dimension.
+a) Cooperative Stacking Operator: To stack the ob-
+servations from the full network, we define
+˜u ≜[ u⊤
+b , u⊤
+1 , . . . , u⊤
+N ]⊤∈Rm(N+1),
+(2)
+with ui ∈Rm denoting an arbitrary vector associated
+with either the reference station (i = b) or a user receiver
+(i ∈{1, . . . , N}).
+b) Cooperative SD Operator: With respect to the
+reference station b, we define
+˜ub ≜˜Db˜u =
+
+u⊤
+b1, . . . , u⊤
+bN
+⊤∈RmN,
+(3)
+where ubr ≜ur −ub ∈Rm, ∀r ∈{1, . . . , N}, denotes the
+per-user SD quantity, and the SD matrix has the form
+˜Db = [−1N ⊗Im, IN ⊗Im] ∈RmN×m(N+1).
+(4)
+c) Cooperative DD Operator: With respect to a pivot
+satellite p, we define
+˜up
+b ≜˜Dp˜ub =
+
+(up
+b1)⊤, . . . , (up
+bN)⊤⊤∈R(m−1)N,
+(5)
+being (up
+br)T = (Dpubr)T ≜
+h
+up1
+br, . . . , up(m−1)
+br
+i
+∈
+Rm−1 the per-user DD vector, and ups
+br ≜us
+br −up
+br =
+us
+r −up
+r −(us
+b −up
+b) ∈R the per-user per-satellite
+differentiation scalar. The DD matrices are defined as
+˜Dp = IN ⊗Dp ∈R(m−1)N×mN,
+Dp = [−1m−1, Im−1] ∈R(m−1)×m.
+(6)
+Note that the one-user DD matrix, Dp, has already been
+presented in the literature [4, Ch. 26].
+2. Single-User Model
+At a given epoch, receiver r measures the pseudorange
+and carrier phase with respect to satellite s as
+ρs
+r = ϱs
+r + T s
+r + Is
+r + c(dtr −dts) + εs
+r ∈R,
+Φs
+r = ϱs
+r + T s
+r −Is
+r + c(dtr −dts) + λN s
+r + ϵs
+r ∈R, (7)
+where ϱs
+r ≜∥ps −pr∥denotes the true satellite–receiver
+range, with ps and pr being the satellite and receiver
+position vectors; dts and dtr are the satellite and receiver
+clock offsets; c is the speed of light; εs
+r and ϵs
+r represent
+unmodeled errors (e.g., thermal noise, multipath, atmo-
+spheric residuals, ephemeris errors); Is
+r and T s
+r denote
+the ionospheric and tropospheric delays; λ is the carrier
+wavelength; and N s
+r is the integer ambiguity [33, Ch. 2].
+For simplicity, we omit frequency and time reference
+labels and neglect ephemeris errors.
+For receiver r, the state vector collecting the unknown
+position and clock offset parameters is given by
+xr = [p⊤
+r , c dtr]⊤∈R4,
+δxr ≜xr −xr,0,
+(8)
+where xr,0 denotes the linearization (assumed reference)
+state used below.
+To obtain a locally linear and tractable model, the true
+range ϱs
+r is linearized with respect to pr by a first-order
+Taylor expansion around the initial estimate pr,0:
+ϱs
+r ≈∥ps −pr,0∥−(es
+r)⊤δpr,
+(9)
+being δpr = pr−pr,0 the position linearization increment,
+and es
+r = −(ps −pr,0)/∥ps −pr,0∥the satellite–receiver
+LOS unit vector. For brevity, the dependence of es
+r on
+pr,0 is omitted in the notation.
+Substituting the linearized range into (7) and ex-
+pressing the result in observed-minus-computed (O-C)
+form yield the following pseudorange and carrier-phase
+residuals for receiver r over the full set of K visible
+satellites [4, Ch. 21]:
+∆ρr = Hr δxr + c dt + Tr + Ir + εr ∈RK,
+∆Φr = Hr δxr + c dt + Tr −Ir + λNr + ϵr ∈RK,
+(10)
+where Hr = [Er, 1K] ∈RK×4 is the observation model
+matrix, with Er = −[e1
+r, . . . , eK
+r ]⊤denoting the geometry
+matrix. Under Assumption A3, Er = E and Hr = H for
+all r. The term c dt includes only the satellite clock, as
+the receiver clock is included in the state.
+Note that the above single-frequency model can be
+extended to the multi-frequency case by stacking obser-
+vations across frequencies and augmenting the state vector
+with the corresponding carrier-phase ambiguities.
+3.
+Multi-User Model
+Applying the stacking operator in (2) to (10) yields
+the full-network O-C measurement equations:
+∆˜ρ = ˜HN+1δ˜x + c ˜dt + ˜T + ˜I + ˜ε ∈RK(N+1),
+∆˜Φ = ˜HN+1δ˜x + c ˜dt + ˜T −˜I + λ ˜N + ˜ϵ ∈RK(N+1),
+(11)
+with ˜HN = IN ⊗H. For clarity, we explicitly write the
+following stacked quantities, based on (2), as
+∆˜ρ ≜[ ∆ρ⊤
+b , ∆ρ⊤
+1 , . . . , ∆ρ⊤
+N ]⊤∈RK(N+1),
+δ˜x ≜[ δx⊤
+b , δx⊤
+1 , . . . , δx⊤
+N ]⊤∈R4(N+1).
+The same stacking convention applies to all other tilded
+quantities in (11).
+Note that the stacked residual vector [ ∆˜ρ⊤, ∆˜Φ⊤]⊤
+has an associated error vector ˜η = [ ˜ε⊤, ˜ϵ⊤]⊤with
+covariance
+˜Σ = E{˜η ˜ηT} =
+ ˜Σρ
+˜Σρ,Φ
+˜ΣΦ,ρ
+˜ΣΦ
+
+∈R2K(N+1)×2K(N+1).
+(12)
+Here, ˜Σρ = diag(Σρ,b, Σρ,1, . . . , Σρ,N), with Σρ,r =
+σ2
+ρ,rW−1
+r
+being the pseudorange covariance of receiver r,
+σ2
+ρ,r the known nominal pseudorange-noise variance. An
+analogous definition applies to ˜ΣΦ. The cross-covariance
+terms in (12) are typically assumed to be negligible,
+except for baselines above 50 km [33, Ch. 2]. Finally, the
+diagonal weighting matrix Wr follows standard GNSS
+variance models based on satellite elevation [55] or signal-
+to-noise ratio [56].
+4.
+Cooperative DGNSS Model (code-only)
+The full-network SD measurement equations are ob-
+tained by applying the SD operator in (3) to (11) as
+∆˜ρb = ˜Db ∆˜ρ = ˜HN δ˜xb + ˜εb ∈RKN,
+(13)
+∆˜Φb = ˜Db ∆˜Φ = ˜HN δ˜xb + λ ˜Nb + ˜ϵb ∈RKN,
+4
+This work has been submitted for possible publication.
+VOL. XX, No. XX
+XXXXX 2025
+TABLE II: Unified representation of parameters for each cooperative GNSS model, mapped to the Gaussian form in (1).
+Method
+Model
+y
+My
+m(θ)
+Σ
+ω
+Mω
+z
+Mz
+C-DGNSS
+(16)
+∆˜ρb
+KN
+˜HNθ
+˜Σb,ρ
+δ˜xb
+4N
+∅
+0
+C-RTK
+(20)
+h
+∆˜Φp⊤
+b
+, ∆˜ρp⊤
+b
+i⊤
+2(K−1)N
+[ ˜B ˜A]θ
+˜Σp
+b
+˜b
+3N
+˜a
+N(K−1)
+where common-mode errors, including satellite clock
+offsets and atmospheric delays, are largely canceled by
+the single-differencing operation.
+The covariance of ˜ηb = [ ˜ε⊤
+b , ˜ϵ⊤
+b ]⊤is given by
+˜Σb = E{˜ηb ˜ηT
+b } =
+ ˜Σb,ρ
+˜Σb,ρ,Φ
+˜Σb,Φ,ρ
+˜Σb,Φ
+
+∈R2KN×2KN,
+(14)
+and the covariance block associated with pseudorange
+measurements can be expressed as
+˜Σb,ρ = ˜Db ˜Σρ ˜D⊤
+b =
+
+
+Σρ,1 + Σρ,b
+· · ·
+Σρ,b
+...
+...
+...
+Σρ,b
+· · ·
+Σρ,N + Σρ,b
+
+,
+(15)
+where all off-diagonal terms correspond to Σρ,b An
+analogous expression holds for ˜Σb,Φ. More details re-
+garding the observation model in (13) can be found in
+the Supplemental Material, Sec. S1-C.
+DEFINITION 1 (C-DGNSS Model). Having introduced
+all relevant terms, we now present the complete C-DGNSS
+observation model (see Table II):
+∆˜ρb|δ˜xb ∼N( ˜HN δ˜xb, ˜Σb,ρ), δ˜xb ∈R4N.
+(16)
+Here, δxbi = δxi −δxb
+(a)
+= δxi, where (a) uses xb = xb,0
+(surveyed base) ⇒δxb = 0. Hence, in C-DGNSS, the
+relative state increment reduces to the user’s absolute one
+as δxbi = [ δp⊤
+bi, c δtbi ]⊤(a)
+= [ δp⊤
+i , c δti ]⊤.
+5. Cooperative RTK Model (code and phase)
+Applying the DD operator in (5) to (13) gives the
+full-network DD measurement equations as
+∆˜ρp
+b = ˜Dp∆˜ρb = ˜Dp ˜EN ˜b + ˜εp
+b ∈R(K−1)N
+(17)
+∆˜Φp
+b = ˜Dp∆˜Φb = ˜Dp ˜EN ˜b + λ˜a + ˜ϵp
+b ∈R(K−1)N
+where, beyond the single-difference error cancelation
+in (13), double differencing cancels receiver clock offsets.
+Here, ˜EN = IN ⊗E, and we use the shorthands ˜b = δ˜pb
+and ˜a = ˜Np
+b to denote the network-wide baseline vector
+and the vector of integer ambiguities, respectively. Note
+that, following the DD operator in (5), we have
+˜a = ˜Np
+b = [ Np⊤
+b1 , . . . , Np⊤
+bN ]⊤∈R(K−1)N,
+(18)
+Np⊤
+br = [ N p1
+br , . . . , N pK
+br ]⊤∈RK−1, ∀r ∈{1, . . . , N},
+N ps
+br = N s
+r −N p
+r −(N s
+b −N p
+b ) ∈R, ∀s ∈{1, . . . , K−1},
+and analogous expressions hold for ∆˜ρp
+b and ∆˜Φp
+b.
+We write the covariance of the stacked error vector
+˜ηp
+b = [ ˜εp⊤
+b , ˜ϵp⊤
+b
+]⊤as
+˜Σp
+b =
+ ˜Σp
+b,ρ
+˜Σp
+b,ρ,Φ
+˜Σp
+b,Φ,ρ
+˜Σp
+b,Φ
+
+∈R2(K−1)N×2(K−1)N,
+(19)
+where ˜Σp
+b,ρ =
+˜Dp ˜Σb,ρ ˜DT
+p and ˜Σp
+b,Φ =
+˜Dp ˜Σb,Φ ˜DT
+p.
+More details regarding the observation model in (17) can
+be found in the Supplemental Material, Sec. S1-D.
+DEFINITION 2 (C-RTK Model). The complete C-RTK
+observation model (see Table II) is given by:
+∆˜ρp
+b
+∆˜Φp
+b
+ 
+˜b
+˜a
+
+∼N
+  ˜B˜b + ˜A˜a, ˜Σp
+b
+
+, ˜b ∈R3N, ˜a ∈RN(K−1),
+(20)
+˜A =
+ ˜Aρ
+˜AΦ
+
+=
+
+0N(K−1)
+λ · IN(K−1)
+
+, ˜B =
+ ˜Bρ
+˜BΦ
+
+=
+ ˜Dp ˜EN
+˜Dp ˜EN
+
+,
+(21)
+with ˜Dp ˜EN = IN ⊗DE due to shared satellite geometry
+among receivers. Under assumption (a) in Definition 1
+(surveyed base), it follows that C-RTK jointly estimates
+user positions, i.e., ˜b = δ˜pb
+(a)
+= [ δp⊤
+1 , . . . , δp⊤
+N ]⊤, and,
+from (18), the double-differenced ambiguities with respect
+to the pivot satellite.
+REMARK 1 (C-DGNSS/C-RTK Model Covariance Struc-
+ture). We hereafter obtain simplified covariance expres-
+sions for the C-DGNSS and C-RTK models, which under-
+pin the theoretical derivations in Section IV.
+Let us assume that all receivers share identical er-
+ror characteristics, i.e., σ2
+ρ,r = σ2
+ρ, σ2
+Φ,r = σ2
+Φ, and
+Wr = W ∀r ∈{1, . . . , N}, leading to Σρ = σ2
+ρ W−1
+and ΣΦ = σ2
+Φ W−1 for all receivers. Let the base station
+share the same weighting matrix, i.e., Wb = W, but
+have a different error variance: σ2
+ρ,b ̸= σ2
+ρ, σ2
+Φ,b ̸= σ2
+Φ.
+Under these assumptions, the covariance matrix in (15)
+simplifies to
+˜Σα
+b,ρ =
+
+
+(1 + α)Σρ
+· · ·
+αΣρ
+...
+...
+...
+αΣρ
+· · ·
+(1 + α)Σρ
+
+= Cα
+N ⊗Σρ,
+(22)
+Cα
+N = IN + α1N,
+(23)
+being α = σ2
+ρ,b/σ2
+ρ the ratio of observation error vari-
+ances between the base station and the receivers in
+the network. An analogous expression holds for ˜Σα
+b,Φ.
+Assuming uncorrelated code and carrier-phase measure-
+ments, (14) simplifies to
+˜Σα
+b =
+
+Cα
+N ⊗Σρ
+0KN
+0KN
+Cα
+N ⊗ΣΦ
+
+∈R2KN×2KN.
+(24)
+and (19) reduces to
+˜Σp,α
+b
+=
+
+˜Σp,α
+b,ρ
+0(K−1)N
+0(K−1)N
+˜Σp,α
+b,Φ
+
+∈R2(K−1)N×2(K−1)N,
+(25)
+˜Σp,α
+b,ρ = Cα
+N ⊗DpΣρD⊤
+p ,
+(26)
+CALATRAVA ET AL.: ESTIMATORS AND BOUNDS FOR COOPERATIVE DIFFERENTIAL GNSS POSITIONING
+5
+TABLE III: Unified representation of parameters of the estimation
+performance bound for each cooperative GNSS model, mapped to the
+general FIM expression in (29).
+Method
+Model
+˜G
+˜R
+C-DGNSS (code-only)
+(34)
+˜HN
+˜Σα
+b,ρ
+C-RTK float
+(35)
+˜Dp ˜EN
+˜Σp,α
+b,ρ
+C-RTK fix
+(37)
+˜Dp ˜EN
+˜Σp,α
+b,Φ
+with an analogous expression for ˜Σp,α
+b,Φ.
+Note that for N = 1, the cooperative model reduces
+to the classical observation model for conventional RTK
+positioning:
+
+∆ρp
+b
+∆Φp
+b
+ 
+
+b
+a
+
+∼N
+ Bb + Aa, Σp
+b
+
+,
+b ∈Rnx, a ∈RK−1,
+(27)
+where b = δpb denotes the baseline between the user
+and the reference station, and a = Np
+b is the vector
+of double-differenced integer ambiguities. The model
+matrices simplify to
+A =
+
+Aρ
+AΦ
+
+=
+
+0K−1
+λIK−1
+
+,
+B =
+
+Bρ
+BΦ
+
+=
+
+DpE
+DpE
+
+.
+(28)
+Similarly, the standard DGNSS model is recovered by
+considering only ∆ρp
+b.
+B. Estimators and Performance Bounds
+This section presents the C-DGNSS (Sec. III-B.1)
+and C-RTK (Sec. III-B.2) estimators, along with their
+corresponding Cram´er-Rao bound (CRB), which provides
+a theoretical lower bound on estimation variance.
+It is convenient to express the FIM of the two models
+under study in a unified form as
+J(ω) = ˜GT ˜R−1 ˜G,
+(29)
+where the model-specific definitions of ˜G and ˜R are
+summarized in Table III.
+REMARK 2 (Solvability condition). A sufficient condition
+for the least squares solution is that the total number of
+independent measurements must be greater than or equal
+to the number of unknowns in the system. For the C-
+DGNSS and C-RTK estimators, this corresponds to [18]
+PN
+r=1 Kr ≥4N, where Kr ≤K denotes the number of
+satellites visible to user r. This condition is guaranteed
+to be satisfied if every user in the scenario has visibility
+to at least 4 satellites.
+1. Cooperative DGNSS Estimator and Bound
+Following the code-only observation model in (16),
+and if the condition in Remark 2 is met, C-DGNSS can be
+formulated as a weighted least squares (WLS) problem:
+ˆω = arg min
+ˆω∈RMy
+
+(y −˜Gω)T ˜R−1(y −˜Gω)
+	
+.
+(30)
+Recall that the terms in this formulation are detailed for
+the C-DGNSS model in Tables II and III.
+(a) All receivers share the same K = 9 satellites in view. Matrix subscripts denote
+user indices.
+(b) One receiver observes fewer satellites than the rest (Kc = 4); notation for
+constrained and open-sky users follows Sec. IV-A.
+Fig. 3: Heatmaps of the C-RTK covariance matrix for pseudorange
+measurements, ˜Σp,α
+b,ρ , under the assumptions of Remark 1 (cf. (25)),
+with W = I, σρ = 1 m, N = 3, and α = 1. An analogous pattern
+is obtained for ˜Σp,α
+b,Φ. [k, :] and [:, k] denote row and column slices.
+See [30, Fig. 3] for the C-DGNSS case under α = 1. See Supplemental
+Material (Sec. S1-D) for a detailed explanation of the element-wise
+noise contributions in C-RTK.
+The estimator in (30) can be obtained through an
+iterative procedure that relinearizes the system model at
+each step, equivalent to the Gauss–Newton optimization
+method [57]. At the k-th iteration, one has
+ˆωk+1 = ˆωk +
+
+˜Gk⊤˜R−1 ˜Gk−1 ˜Gk⊤˜R−1(y −˜Gk ˆωk),
+(31)
+where the geometry matrix ˜Gk is evaluated at ˆωk, al-
+though this dependency is omitted in the notation for
+simplicity. Remarkably, the computational cost of the pro-
+posed estimator in (31) is dominated by the inversion of
+( ˜G⊤˜R−1 ˜G), which scales as O(N 3), increasing rapidly
+with the number of users and motivating future work on
+distributed formulations to improve scalability.
+Given the Gaussian assumption in (16), the estima-
+tor in (30) is optimal and equivalent to the maximum
+likelihood estimator (MLE), whose estimation accuracy is
+theoretically lower-bounded by the CRB. To evaluate the
+CRB for a specific user r, we extract the corresponding
+3 × 3 submatrix from the FIM, which is associated with
+that user’s 3D position parameters. For this purpose, we
+introduce the operator [30], [54]
+blockr(X) = X[3(r −1) + 1 : 3r, 3(r −1) + 1 : 3r],
+(32)
+where [i : j, k : l] denotes the submatrix formed by rows
+i to j and columns k to l, and the indices follow a one-
+based convention, with r ∈{1, 2, . . . , N}.
+A lower bound on the variance of the estimate of the
+i-th parameter is provided by the CRB as
+Var(ˆωi) ≥CRB(ωi) = [J−1(ω)]ii,
+(33)
+6
+This work has been submitted for possible publication.
+VOL. XX, No. XX
+XXXXX 2025
+where ωi = [ω]i, and the FIM is defined as
+[J(ω)]i,j = −E
+∂2 ln p(y; ω)
+∂ωi∂ωj
+
+= [ ˜GT ˜R−1 ˜G]i,j.
+(34)
+As a scalar 3D positioning performance metric for
+receiver r we calculate the root mean square error
+(RMSE) of its position estimate, expressed in meters, as
+p
+Tr [blockr (J−1(ω))].
+2. Cooperative RTK Estimator and Bound
+The model in (1) defines a mixed linear regression
+problem involving both real-valued parameters ω and
+integer-valued parameters z, a characteristic feature of
+GNSS carrier-phase positioning [58]. Due to the integer
+nature of z, the estimation problem admits no closed-
+form solution. Following standard RTK practice, a three-
+stage procedure is adopted (i.e., float estimation, integer
+ambiguity resolution, and fixed estimation) and this ar-
+chitecture is extended to the cooperative setting in [29].
+In [58], the performance of this mixed real–integer es-
+timation problem is characterized by a McAulay-Seidman
+(MSB) constructed from a finite set of test points. That
+framework provides a rigorous treatment of both float
+and fixed regimes but leads to expressions that are not
+easily embedded in the unified C-DGNSS/C-RTK anal-
+ysis introduced in this work. We therefore focus on the
+corresponding Cram´er–Rao-type bounds that describe the
+float and fix regions of C-RTK, which can be interpreted
+as limiting cases of the MSB when the ambiguities remain
+unresolved (float) or are correctly fixed. For completeness,
+we briefly summarize these bounds below and refer the
+reader to [58] for the full MSB formulation.
+Note that in addition to the CRB, the probability of
+success of integer ambiguity resolution (i.e., the likeli-
+hood that the correct integer vector is fixed) can be upper
+bounded as in [29, Eq. (17)].
+C-RTK Float: When the integer ambiguities are
+treated as real-valued, i.e., ω ∈RKω, z ∈RKz, C-RTK
+operates in the float regime. In this case, the FIM for θ
+is given by (see [58, Eq. (26)] for the non-cooperative
+case):
+J(θ) =
+ ˜B⊤
+˜A⊤
+
+( ˜Σp,α
+b
+)−1  ˜B
+˜A
+
+=
+ ˜B⊤
+ρ
+˜B⊤
+Φ
+˜A⊤
+ρ
+˜A⊤
+Φ
+ ( ˜Σp,α
+b,ρ )−1
+( ˜Σp,α
+b,Φ)−1
+  ˜Bρ
+˜Aρ
+˜BΦ
+˜AΦ
+
+=
+"
+˜B⊤
+ρ
+
+( ˜Σp,α
+b,ρ )−1 + ( ˜Σp,α
+b,Φ)−1
+˜Bρ
+λ ˜B⊤
+ρ ( ˜Σp,α
+b,Φ)−1
+λ( ˜Σp,α
+b,Φ)−1 ˜Bρ
+λ2( ˜Σp,α
+b,Φ)−1
+#
+.
+(35)
+Here, we incorporate α as defined in Remark 1, assume
+uncorrelated carrier-phase and code measurements follow-
+ing (25), and adopt from (21) ˜AΦ = λ IN(K−1), ˜Aρ = 0,
+and ˜Bρ = ˜BΦ. Let U, V, and W denote the top-left, off-
+diagonal, and bottom-right blocks of (35), respectively.
+The CRB for ω corresponds to the (1, 1) block of J(θ)−1,
+which by the Schur complement is
+CRB(ˆω) =
+ U −VW−1V⊤−1 =
+
+˜B⊤
+ρ
+  ˜Σp,α
+b,ρ
+−1 ˜Bρ
+−1
+.
+(36)
+In the float regime, precision is dominated by the code
+measurements because the ambiguities remain unresolved.
+The RTK float bound corresponds to the information
+obtained after projecting the observation matrix onto the
+subspace orthogonal to the ambiguity space [33, Eq.
+(2.16)].
+C-RTK Fix: Further gains arise once the ambiguities
+are correctly resolved and treated as integers. In this fix
+region, the FIM for ω is given by [58, Eq. (25a)]
+J(ω) = ˜B⊤( ˜Σp,α
+b
+)−1 ˜B = ˜B⊤
+ρ
+
+( ˜Σp,α
+b,ρ )−1 + ( ˜Σp,α
+b,Φ)−1
+˜Bρ,
+(37)
+where the assumptions and matrix definitions from (35)
+continue to apply. Under the standard assumption that
+σΦ ≪σρ, the approximation ( ˜Σp,α
+b,Φ)−1 + ( ˜Σp,α
+b,ρ )−1 ≈
+( ˜Σp,α
+b,Φ)−1 holds, leading to an estimation precision domi-
+nated by the carrier-phase measurements, with the bound
+CRB(ˆω) ≈
+
+˜B⊤
+ρ ( ˜Σp,α
+b,Φ)−1 ˜Bρ
+−1
+.
+(38)
+Thus far in this work, we have introduced unified obser-
+vation models for cooperative DGNSS and cooperative
+RTK, along with their position estimation problems and
+CRB-based performance bounds.
+IV.
+Theoretical Performance Analysis
+This section provides a comprehensive theoretical
+analysis of the asymptotic performance of the C-DGNSS
+and C-RTK estimators as a function of three key pa-
+rameters relevant to the cooperative positioning scenario
+considered in this work, as illustrated in Fig. 1: (i) the
+number of aiding users in the network No; (ii) the number
+of satellites exclusively visible to them Ko; and (iii) the
+variance ratio α, introduced in Remark 1.
+Sec. IV-A introduces the two-cluster visibility model
+considered in this work. In Sec. IV-B, we provide the
+closed-form expression of the FIM in (29) parameterized
+as a function of No, Ko, and α, with the detailed steps
+given in Sec. S2 of the Supplemental Material. Sec. IV–C
+presents the theoretical asymptotic analysis.
+A.
+Network Clustering
+We address the inherent heterogeneity of satellite
+visibility in practical GNSS deployments by classifying
+the cooperative network into two clusters.
+The first cluster comprises Nc constrained-visibility
+users (also referred to as aided users), operating under
+constrained visibility conditions, such as in urban envi-
+ronments, with access to Kc satellites. The second cluster
+consists of the remaining No = N −Nc open-sky users
+(also referred to as aiding users), who observe a total
+of K = Kc + Ko satellites, where Ko ≥0 denotes the
+number of satellites exclusively visible to this group.
+CALATRAVA ET AL.: ESTIMATORS AND BOUNDS FOR COOPERATIVE DIFFERENTIAL GNSS POSITIONING
+7
+Figure 3 depicts how the covariance structure formu-
+lated in Definitions 1 and 2 varies between a homoge-
+neous and a clustered network, the latter including users
+with constrained visibility.
+To incorporate the clustered geometry into the unified
+cooperative model in (1), we define
+˜G = blkdiag(Gc, INo ⊗G), G = [G⊤
+c G⊤
+o ]⊤,
+(39)
+˜R =
+
+
+(1 + α)Rc
+1⊤
+No ⊗
+
+αRc
+0Kc, Ko
+
+1No ⊗
+
+αRc
+0Ko, Kc
+
+Cα
+No ⊗R
+
+.
+(40)
+where blkdiag(·) denotes the block-diagonal concatena-
+tion operator, R =
+
+Rc
+0
+0
+Ro
+
+, and Cα
+No is as intro-
+duced in (23). Let us denote the blocks of matrix ˜R
+as ˜Rc = (1 + α)Rc, ˜Rc,o = 1⊤
+No ⊗
+
+αRc
+0Kc, Ko
+
+,
+and ˜Ro = Cα
+No ⊗R. Furthermore, in (40), we adopt the
+assumptions outlined in Remark 1 and consider the case
+Nc = 1, which facilitates the analytical manipulation of
+the covariance expression while still providing a represen-
+tative assessment of the position estimation performance
+for an aided user. This performance is quantified by
+CRB(ˆωc) = block1(J(ω)−1),
+(41)
+where ωc ∈R3 denotes the real-valued unknowns asso-
+ciated with the aided user. Let us introduce
+Jc = G⊤
+c R−1
+c Gc,
+Jo = G⊤
+o R−1
+o Go,
+(42)
+where Jc and Jo capture the Fisher information from
+jointly observed satellites and from satellites visible only
+to the aiding users, respectively.
+Theoretical Benchmarks: We consider two bench-
+marks for comparison. The first is the non-cooperative
+bound reflecting the performance of standard differential
+architectures, i.e., DGNSS, RTK, defined as
+CRBNon-Coop = (1 + α) J−1
+c .
+(43)
+Here, the factor 1 + α accounts for the contribution of
+error variances from both the base station and the aided
+user, as reflected in the diagonal elements of (22). The
+second is the ideal bound, which is defined as
+CRBIdeal = J−1
+c .
+(44)
+This corresponds to a differential architecture with noise-
+less base station, i.e., α = 0, yielding to a performance
+bounded by he geometry of the aided user.
+B. Parameterized Fisher Information Matrix
+From the unified linear model in (29), the FIM admits
+the parameterization in (45) for arbitrary No and α, owing
+to the block structure of ˜R. The intermediate derivation
+steps leading to (45) and the coefficients βi(α), i ∈
+{0, 1, . . . , 5} are provided in Sec. S2 of the Supplemental
+Material. The compact and full definitions of βi(α) are
+listed in Table VI; β3(α) is only used in the supplement.
+TABLE IV: βi(α) coefficient definitions as introduced in Sec. IV–B.
+Note that β1 = β2 + 1 and β4 = β5 + 1. Derivations leading to these
+expressions can be found in Sec. S2 of the Supplemental Material.
+Coefficient
+Compact Form
+Full Form
+β0(α)
+—
+1
+1 + αNo
+β1(α)
+(αβ0(α) + 1)−1
+αNo + 1
+αNo + α + 1
+β2(α)
+−α β1(α) β0(α)
+−
+α
+αNo + α + 1
+β3(α)
+α β2(α) β0(α)
+−
+α2
+(1+αNo) αNo+α+1
+β4(α)
+1 −α β0(α)
+1 + α(No −1)
+αNo + 1
+β5(α)
+−α β0(α)
+−
+α
+αNo + 1
+Left/right-multiplication by
+˜G preserves the block
+structure of ˜R, mapping each covariance block into its
+corresponding block of J(ω). The diagonal blocks scale
+with Jc and Jo, reflecting the contributions of common
+and exclusive satellites, whereas the off-diagonal blocks
+depend solely on Jc. This results in the compact expres-
+sion in (45), whose sub-blocks Mij for i, j ∈{1, 2} will
+be used in the asymptotic analysis of Sections IV–C. For
+the compact form of block M22, we use that β1 = β2 +1
+and β4 = β5 + 1, as explained in the supplement.
+C.
+Study of Asymptotic Regimes
+This section focuses on the term in (41) capturing the
+estimation performance of the aided user, which can be
+calculated with the Schur complement of matrix (45) as
+CRB(ˆωc) =
+ M11 −M12M−1
+22 M21
+−1 .
+(46)
+We next examine this bound under key limiting regimes.
+Note that for No = 0, the bound reduces to the non-
+cooperative case and needs no further analysis.
+It can be shown that the CRB for code-based DGNSS
+and RTK float are equivalent in the absence of ephemeris
+or satellite clock errors. Hence, the asymptotic analysis
+based on the C-DGNSS block structure in (40) also
+characterizes the asymptotic regimes of C-RTK float.
+Moreover, since the C-RTK fixed bound in (38) has the
+same analytical form, differing only by the measurement
+precision, these conclusions also extend to C-RTK fixed.
+1.
+Ideal Aiding-Cluster Satellite Visibility
+The limit Jo →∞models ideal satellite visibility for
+the aiding users, i.e., an aiding cluster whose exclusive
+satellites provide arbitrarily large Fisher information.
+Considering that M−1
+22 −−−−→
+Jo→∞01, (46) simplifies to
+CRB(ˆωc) −−−−→
+Jo→∞β1(α)−1J−1
+c
+≤CRBNon-Coop,
+(47)
+1We write the bottom-right block of (45) as M22(λ) = A + λB,
+where A and B contain the Jc and Jo terms, and λ > 0. As λ →∞,
+the λB term dominates, yielding M−1
+22 (λ) →1
+λ B−1.
+8
+This work has been submitted for possible publication.
+VOL. XX, No. XX
+XXXXX 2025
+J(ω) =
+
+
+β1(α)Jc
+h
+β2(α)Jc
+· · ·
+β2(α)Jc
+i
+
+
+β2(α)Jc
+...
+β2(α)Jc
+
+
+
+
+β1(α)Jc + β4(α)Jo
+· · ·
+β2(α)Jc + β5(α)Jo
+...
+...
+...
+β2(α)Jc + β5(α)Jo
+· · ·
+β1(α)Jc + β4(α)Jo
+
+
+
+
+=
+
+
+β1(α)Jc
+|
+{z
+}
+M11
+β2(α)
+
+1¯
+T
+No ⊗Jc
+
+|
+{z
+}
+M12
+β2(α)
+ 1¯No ⊗Jc
+
+|
+{z
+}
+M21
+(INo + β2(α) 1No)⊗Jc
++ (INo + β5(α) 1No)⊗Jo
+|
+{z
+}
+M22
+
+
+=
+
+
+αNo + 1
+αNo + α + 1 Jc
+
+−
+α
+αNo + α + 1 Jc
+· · ·
+−
+α
+αNo + α + 1 Jc
+
+
+
+−
+α
+αNo + α + 1 Jc
+...
+−
+α
+αNo + α + 1 Jc
+
+
+
+
+αNo + 1
+αNo + α + 1 Jc + 1 + α(No −1)
+αNo + 1
+Jo
+· · ·
+−
+α
+αNo + α + 1 Jc −
+α
+αNo + 1 Jo
+...
+...
+...
+−
+α
+αNo + α + 1 Jc −
+α
+αNo + 1 Jo
+· · ·
+αNo + 1
+αNo + α + 1 Jc + 1 + α(No −1)
+αNo + 1
+Jo
+
+
+
+
+(45)
+The detailed block-matrix and Kronecker-product manipulations are deferred to Sec. S2 of the Supplemental Material.
+where the inequality holds for all No ∈N0 and α >
+0. This result shows that, under ideal aiding visibility,
+cooperation always yields an improvement over the non-
+cooperative bound in (43).
+The term β1(α)−1 decreases monotonically with No,
+indicating that the cooperative bound becomes increas-
+ingly tighter as more aiding users are added. This mono-
+tonic decrease is confirmed by
+∂β1(α)−1
+∂No
+= −
+α2
+(αNo+1)2
+being strictly negative for all α > 0. For a fixed No and
+α1 > α2, we have
+ ∂β1(α1)−1
+∂No
+ >
+ ∂β1(α2)−1
+∂No
+, meaning
+that β1(α)−1 decreases faster with No when α is larger. In
+other words, the rate of improvement due to cooperation
+is more noticeable for noisier reference stations.
+2. Homogeneous Inter-Cluster Satellite Visibility
+We examine the homogeneous case Jo = 0, where all
+users have identical visibility and no aiding user provides
+additional information. This serves as a baseline to test
+whether cooperation can help when visibility offers no
+diversity. The CRB under homogeneous satellite visibility
+is given by:
+CRB(ˆωc)|Jo=0 =
+
+M11 −M12
+
+M22|Jo=0
+−1 M21
+−1
+.
+(48)
+Let us calculate the intermediate terms as2
+
+M22|Jo=0
+−1 = [(INo + β2(α) 1No)⊗Jc]−1
+(49a)
+= [INo + β2(α)1No]−1 ⊗J−1
+c
+(49b)
+=
+
+INo −
+β2(α)
+β2(α)No + 11No
+
+|
+{z
+}
+Ω1
+⊗J−1
+c ,
+(49c)
+M12
+
+M22|Jo=0
+−1 = β2(α)
+ 1T
+No ⊗Jc
+  Ω1 ⊗J−1
+c
+
+(50a)
+= β2(α)
+ 1T
+NoΩ1
+
+⊗
+ JcJ−1
+c
+
+(50b)
+= −
+α
+α + 1 1T
+No ⊗IKc.
+(50c)
+2In (49b) and (50b), we use the standard Kronecker identities (A⊗
+B)−1 = A−1 ⊗B−1 and (A ⊗B)(C ⊗D) = (AC) ⊗(BD).
+The inversion in (49c) follows directly from the Sherman–
+Morrison formula:
+(I + uv⊤)−1 = I −
+uv⊤
+1 + v⊤u,
+(51)
+applied with u = v =
+p
+β2(α) 1No, and leading to
+the auxiliary matrix Ω1 with diagonal entries 1+2α
+1+α and
+off-diagonal entries
+α
+1+α. In (50c), we use 1T
+NoΩ1 =
+
+1+2α
+1+α + PNo−1
+i=1
+α
+α+1
+
+1T
+No =
+αNo+α+1
+α+1
+1T
+No, which fol-
+lows from summing the diagonal and off-diagonal con-
+tributions of Ω1.
+(a) Impact of the inter-user correlation factor α for No = 10.
+(b) Impact of the number of aiding users No for α = 0.5.
+Fig. 4: Impact of cooperative network parameters on 3D positioning
+RMSE in C-DGNSS. Results are shown for Ko
+=
+{8, 14, 19}.
+We report CRBDGNSS (43), CRBIdeal DGNSS (44), the asymptotic
+benchmark β1(α)−1 (47), and, for the C-DGNSS model in Table III,
+CRBC-DGNSS (34) and WLSC-DGNSS (30).
+CALATRAVA ET AL.: ESTIMATORS AND BOUNDS FOR COOPERATIVE DIFFERENTIAL GNSS POSITIONING
+9
+Substituting (50c) and the M11 and M21 blocks
+from (45) into (48), we obtain:
+CRB(ˆωc)|Jo=0 =
+
+β1(α) Jc + α β2(α)
+α + 1 Ω2
+−1
+(52a)
+=
+
+β1(α) + α β2(α)
+α + 1 No
+−1
+J−1
+c
+(52b)
+= (1 + α) J−1
+c
+= CRBNon-Coop.
+(52c)
+In (52a) we use the auxiliary matrix Ω2 = (1⊤
+No ⊗
+IKc)(1No ⊗Jc) = (1⊤
+No1No) ⊗Jc = NoJc.
+The result in (52c) shows that, for finite No, co-
+operation provides no gain when aiding users offer no
+additional visibility. In this scenario, adding users with
+identical information, effectively corresponding to Nc >
+1, leaves the performance unchanged.
+3. Disjoint Inter-Cluster Satellite Visibility
+We consider the case in which the constrained user
+shares no satellites with the aiding users, whose observa-
+tion matrix in (39) reduces to G = Go, corresponding to
+observations of Ko satellites only. Under this condition,
+the covariance in (40) becomes block diagonal, with
+all cross-covariance terms vanishing, and its structure
+comprising an upper-left block (1 + α)Rc and a lower-
+right block Cα
+No ⊗Ro. The FIM for this case is:
+J(ω)|G=Go =
+
+
+(1 + α) Jc
+0Mω, MωNo
+0MωNo, Mω
+
+
+β4(α)Jo
+· · ·
+β5(α)Jo
+...
+...
+...
+β5(α)Jo
+· · ·
+β4(α)Jo
+
+
+
+.
+Comparing this result with the non-disjoint case in (45),
+the aiding-user block preserves its cooperative structure,
+whereas the constrained-user block reduces to (1 + α)Jc
+rather than β1(α)Jc. Consequently, the Schur complement
+yields the non-cooperative bound in (43), indicating that
+disjoint satellite visibility provides no benefit to the con-
+strained user.
+4. Large-Scale Cooperative Network
+To characterize the asymptotic behavior of coopera-
+tion, we consider the regime where the number of aiding
+users grows without bound. In this limit, β1(α) −−−−→
+No→∞1
+and β2(α) −−−−→
+No→∞0, so the FIM in (45) converges to
+J(ω) −−−−→
+No→∞
+
+Jc
+0Mω,MωNo
+0MωNo,Mω
+INo ⊗(Jc + Jo)
+
+.
+(53)
+The cross-information terms vanish, and the Schur com-
+plement reduces to
+CRB(ˆωc) −−−−→
+No→∞J−1
+c
+= CRBIdeal.
+(54)
+Hence, in large-scale networks, cooperation asymptoti-
+cally removes the impact of the base-station noise and
+drives the constrained-user bound to the ideal limit deter-
+mined solely by Jc.
+V.
+Simulation Experiments
+This section evaluates the proposed methodologies
+through simulation experiments. We first outline the ex-
+perimental setup, followed by an analysis of the impact of
+No, Ko, and α on the 3D position RMSE and ambiguity
+fix success rate of the proposed cooperative differential
+GNSS frameworks. For a consolidated overview of the
+observed trends, see Table V.
+An elevation mask of 20◦is applied, with the base
+station tracking a total of K = 19 satellites. The con-
+strained visibility cluster comprises Nc = 2 aided users,
+each observing Kc = 4 satellites with geometric dilution
+of precision (GDOP) of 2.5. The weighting matrix is
+set to Wr = I, reflecting the assumption of identical
+noise variance across all satellites. To obtain statistically
+meaningful results, M
+= 104 Monte Carlo runs are
+conducted for each parameter variation and experiment.
+The performance of the cooperative differential GNSS
+estimator is reported for the first user in the constrained-
+visibility cluster and is compared against two reference
+limits: the model CRB and the asymptotic benchmark
+β1(α)−1 corresponding to the ideal-visibility regime dis-
+cussed in Sec. IV-C.1.
+Figure 4 highlights the complementary roles of the
+inter-user correlation factor α and the number of aiding
+users No in cooperative positioning. For increasing values
+of α, the RMSE grows as expected, since a larger α
+implies a higher noise contribution from the base station,
+which directly inflates the effective measurement covari-
+ance of all single-differenced observations. Nevertheless,
+for any fixed α, cooperation consistently improves po-
+sitioning performance. The gain increases with both the
+number of aiding users No and the number of additional
+satellites they observe Ko, since both factors enhance the
+network visibility. For fixed No and α, as Ko grows, the
+cooperative RMSE approaches the asymptotic benchmark
+β−1
+1 , reflecting the ideal-visibility regime. This trend is
+observed across all values of α, confirming that sufficient
+cooperative visibility can compensate for increased base-
+station noise.
+We provide additional experiments considering the
+C-RTK framework to assess the impact of cooperation
+on carrier-phase positioning and integer ambiguity res-
+olution. In this experiment, the base station and aiding
+receivers track a total of K = Ko = 8 satellites, while
+the aided user (Nc = 1) observes Kc = 4 satellites,
+yielding a standalone GDOP of 2.97. The base–rover
+variance ratio is set to α = 1 for both code and carrier-
+phase observations, and σΦ = σρ/100. The empirical
+ambiguity–resolution success rate is defined as
+ˆPsucc = 1
+M
+M
+X
+m=1
+δ
+
+ˆa(m)
+c
+−aref,c
+
+,
+(55)
+where ˆa(m)
+c
+denotes the estimated ambiguity vector of
+the constrained user at the m-th Monte Carlo iteration,
+aref,c is the corresponding true ambiguity vector, and δ(x)
+denotes the Kronecker delta.
+10
+This work has been submitted for possible publication.
+VOL. XX, No. XX
+XXXXX 2025
+Fig. 5: Impact of cooperative network parameters on 3D positioning RMSE and ambiguity resolution in C-RTK. Results are reported for No ∈
+{1, 5, 25}. We show (left) the bounds CRBC-RTK,float in (36) and CRBC-RTK,fix in (38), together with the empirical WLSC-RTK performance,
+and (right) the success probability ˆPsucc in (55). For reference, the corresponding non-cooperative baselines are included in all cases.
+TABLE V: Summary of the impact of key system parameters on C-DGNSS and C-RTK performance, as established by the theoretical performance
+limits in Sec. IV and validated via the simulation study in Sec. V.
+Parameter
+Impact on Cooperative DGNSS/RTK
+No: Number of aiding users
+Performance improvement for No ≥1 subject to Ko ≥Kc.
+Ko: Number of satellites exclusively visible to aiding users
+Performance improvement for Ko ≥Kc, subject to No ≥1.
+α: Base–receiver variance ratio
+Rate of improvement offered by cooperation increases with α.
+Jc: FIM of the aided user (intrinsic geometric limit)
+Performance cannot improve beyond J−1
+c
+even with ideal cooperation.
+Nc: Number of constrained users
+No impact.
+Kc: Number of satellites jointly visible to aided/aiding users
+Improved intrinsic geometric limit Jc.
+Figure 5 (left) depicts the positioning RMSE as a
+function of the code variance of the receivers (both aided
+and aiding) for different numbers of cooperating users.
+Two regimes are clearly observed, namely the float and fix
+regimes, and in both cases cooperation yields a consistent
+improvement over the non-cooperative baseline. It can be
+observed that increasing the number of cooperating users
+shifts the transition to the fixed-ambiguity regime toward
+higher noise levels, indicating that cooperation enables
+faster and more reliable ambiguity resolution. This effect
+is further quantified in Fig. 5 (right), which shows a
+marked increase in the empirical ambiguity resolution
+success rate as the number of cooperating users grows.
+VI. Conclusion
+We introduce a unified estimation framework for
+cooperative differential GNSS that integrates code- and
+carrier-phase techniques while accommodating reference
+stations of arbitrary noise quality. Using analytical manip-
+ulations of the Fisher Information Matrix, we characterize
+the asymptotic performance of C-DGNSS and C-RTK
+as a function of receiver count, satellite visibility, and
+measurement variance. Cooperation improves the posi-
+tioning accuracy of users with limited satellite visibility,
+and the influence of base-station noise diminishes as
+the network size increases when cooperative users bring
+enhanced visibility. In large networks, the achievable
+accuracy converges to the limit imposed by the user’s
+own satellite geometry. For carrier-phase positioning, the
+C-RTK formulation further enhances ambiguity resolution
+relative to independent RTK solutions. Simulation results
+validate the theoretical insights presented in this paper.
+Our findings show that even low-cost reference stations
+can deliver high-quality positioning when leveraging mul-
+tiple users, offering a pathway toward more accessible
+differential GNSS services.
+REFERENCES
+[1]
+P.D. Groves Principles of GNSS, Inertial, and Multisensor Inte-
+grated Navigation Systems, Second Edition GNSS/GPS. Artech
+House, 2013.
+[2]
+Y Jade Morton, Frank van Diggelen, James J Spilker Jr, Brad-
+ford W Parkinson, Sherman Lo, and Grace Gao Position, Navi-
+gation, and Timing Technologies in the 21st Century: Integrated
+Satellite Navigation, Sensor Systems, and Civil Applications
+John Wiley & Sons, 2021.
+[3]
+Daniel Egea-Roca, Markel Arizabaleta-Diez, Thomas Pany, Felix
+Antreich, Jose A Lopez-Salcedo, Matteo Paonni, and Gonzalo
+Seco-Granados “GNSS user technology: State-of-the-art and
+future trends,” IEEE Access, vol. 10, pp. 39939–39968, 2022.
+[4]
+Peter Teunissen and O Montenbruck, Eds. Springer Handbook of
+Global Navigation Satellite Systems, vol. XXXI Springer, 2017.
+[5]
+Nigel Williams, Parisa Borhani Darian, Guoyuan Wu, Pau Closas,
+and Matthew Barth “Impact of positioning uncertainty on con-
+nected and automated vehicle applications,” SAE International
+Journal of Connected and Automated Vehicles, vol. 6, 08 2022.
+[6]
+Bruno Mendes, Marco Ara´ujo, Adriano Goes, Daniel Corujo,
+and Arnaldo S.R. Oliveira “Exploring V2X in 5G networks:
+A comprehensive survey of location-based services in hybrid
+scenarios,” Vehicular Communications, vol. 52, pp. 100878,
+2025.
+[7]
+Tarek Hassan, Ahmed El-Mowafy, and Kan Wang “A review of
+system integration and current integrity monitoring methods
+for positioning in intelligent transport systems,” IET Intelligent
+Transport Systems, vol. 15, no. 1, pp. 43–60, 2021.
+[8]
+Xiangdong An, Andrea Bell´es, Filippo Giacomo Rizzi, Lukas
+H¨osch, Christoph Lass, and Daniel Medina “Array PPP-RTK: A
+high precision pose estimation method for outdoor scenarios,”
+IEEE Transactions on Intelligent Transportation Systems, vol.
+25, no. 6, pp. 6223–6237, 2023.
+CALATRAVA ET AL.: ESTIMATORS AND BOUNDS FOR COOPERATIVE DIFFERENTIAL GNSS POSITIONING
+11
+[9]
+Gerhard Wabbena, Martin Schmitz, and Andreas Bagge “PPP-
+RTK: Precise point positioning using state-space representation
+in RTK networks,” in Proceedings of the 18th International
+Technical Meeting of the Satellite Division of the Institute of
+Navigation (ION GNSS 2005), 2005, pp. 2584–2594.
+[10]
+Pengyu Hou, Jiuping Zha, Teng Liu, and Baocheng Zhang “Recent
+advances and perspectives in GNSS PPP-RTK,” Measurement
+Science and Technology, vol. 34, no. 5, pp. 051002, 2023.
+[11]
+Ronghe Jin, Guohao Zhang, Li-Ta Hsu, and Yu Hu “A survey
+on cooperative positioning using GNSS measurements,” IEEE
+Transactions on Intelligent Vehicles, 2024.
+[12]
+Kai Liu, Hock Beng Lim, Emilio Frazzoli, Houling Ji, and Victor
+C. S. Lee “Improving positioning accuracy using GPS pseu-
+dorange measurements for cooperative vehicular localization,”
+IEEE Transactions on Vehicular Technology, vol. 63, no. 6, pp.
+2544–2556, 2014.
+[13]
+Alex Minetto and Fabio Dovis “On the information carried by
+correlated collaborative ranging measurements for hybrid posi-
+tioning,” IEEE Transactions on Vehicular Technology, vol. 69,
+no. 2, pp. 1419–1427, 2019.
+[14]
+Fabian de Ponte M¨uller, Alexander Steingass, and Thomas Strang
+“Zero-baseline measurements for relative positioning in vehicu-
+lar environments,” in 6th European Workshop on GNSS Signals
+and Signal Processing, 2013.
+[15]
+Alex Minetto, Maria Chiara Bello, and Fabio Dovis “DGNSS
+cooperative positioning in mobile smart devices: A proof of
+concept,” IEEE Transactions on Vehicular Technology, vol. 71,
+no. 4, pp. 3480–3494, 2022.
+[16]
+Muhammad Tahir, Sayed Saad Afzal, Muhammad Saad Chugh-
+tai, and Khurram Ali “On the accuracy of inter-vehicular
+range measurements using GNSS observables in a cooperative
+framework,” IEEE Transactions on Intelligent Transportation
+Systems, vol. 20, no. 2, pp. 682–691, 2019.
+[17]
+Ana¨ıs Del´epaut, Alex Minetto, and Fabio Dovis “Code-based
+differential GNSS ranging for lunar orbiters: Theoretical review
+and application to the NaviMoon observables,” Remote Sensing,
+vol. 16, no. 15, 2024.
+[18]
+Bin Huang, Zheng Yao, Xiaowei Cui, and Mingquan Lu “Dilution
+of precision analysis for GNSS collaborative positioning,” IEEE
+Transactions on Vehicular Technology, vol. 65, no. 5, pp. 3401–
+3415, 2016.
+[19]
+Ali Naouri, Lorenzo Ortega, Jordi Vil`a-Valls, and Eric Chaumette
+“A multidimensional scaling approach for cooperative GNSS
+navigation,” in International Conference on Localization and
+GNSS, 2021, pp. 1–6.
+[20]
+Anat Schaper and Steffen Sch¨on “Multi-agent multi-sensor col-
+laboration for improved positioning in urban environment,” in
+Proceedings of the 37th International Technical Meeting of the
+Satellite Division of The Institute of Navigation (ION GNSS+
+2024), 2024, pp. 2780–2792.
+[21]
+Federico Penna, Mauricio A Caceres, and Henk Wymeersch
+“Cram´er-Rao bound for hybrid GNSS-terrestrial cooperative
+positioning,” IEEE Communications Letters, vol. 14, no. 11,
+pp. 1005–1007, 2010.
+[22]
+Eun-Kyu Lee, Soon Y Oh, and Mario Gerla “RFID assisted vehicle
+positioning in VANETs,” Pervasive and Mobile Computing, vol.
+8, no. 2, pp. 167–179, 2012.
+[23]
+Jie Du and Matthew J Barth “Next-generation automated vehicle
+location systems: Positioning at the lane level,” IEEE Transac-
+tions on Intelligent Transportation Systems, vol. 9, no. 1, pp.
+48–57, 2008.
+[24]
+Shahram Rezaei and Raja Sengupta “Kalman filter-based inte-
+gration of DGPS and vehicle sensors for localization,” IEEE
+transactions on control systems technology, vol. 15, no. 6, pp.
+1080–1088, 2007.
+[25]
+Guohao Zhang, Weisong Wen, and Li-Ta Hsu “Rectification of
+GNSS-based collaborative positioning using 3D building mod-
+els in urban areas,” GPS solutions, vol. 23, no. 3, pp. 83, 2019.
+[26]
+Guohao Zhang, Hoi-Fung Ng, Weisong Wen, and Li-Ta Hsu “3D
+mapping database aided GNSS based collaborative positioning
+using factor graph optimization,” IEEE Transactions on Intel-
+ligent Transportation Systems, vol. 22, no. 10, pp. 6175–6187,
+2020.
+[27]
+Helena Calatrava, Daniel Medina, and Pau Closas “Massive dif-
+ferencing of GNSS pseudorange measurements,” in IEEE/ION
+Position, Location and Navigation Symposium (PLANS), 2023,
+pp. 891–896.
+[28]
+Helena Calatrava, Adri`a Gusi, Ernest Artiaga, and Pau Closas,
+“Collaborative differential global navigation satellite system
+(GNSS),” Sept. 12 2024,
+US Patent App. 18/120,389.
+[29]
+Daniel Medina, Helena Calatrava, J Manuel Castro-Arvizu, Pau
+Closas, and Jordi Vila-Valls “A collaborative RTK approach
+to precise positioning for vehicle swarms in urban scenarios,”
+in IEEE/ION Position, Location and Navigation Symposium
+(PLANS). IEEE, 2023, pp. 254–259.
+[30]
+Helena Calatrava, Daniel Medina, and Pau Closas “Collaborative
+code-based differential GNSS for multi-user positioning,” in
+2025 IEEE/ION Position, Location and Navigation Symposium
+(PLANS), 2025.
+[31]
+Clement A Ogaja “GNSS CORS networks and data,” in Intro-
+duction to GNSS Geodesy: Foundations of Precise Positioning
+Using Global Navigation Satellite Systems. 2022, pp. 93–118,
+Springer.
+[32]
+Bu-Gyeom Kim, Donguk Kim, Junesol Song, and Changdon Kee
+“Expanding network RTK coverage using an ionospheric-free
+combination and Kriging for tropospheric delay,” NAVIGA-
+TION, vol. 71, no. 3, 2024.
+[33]
+Daniel Medina, Robust GNSS carrier phase-based position and
+attitude estimation, Ph.D. thesis, Universidad Carlos III de
+Madrid, 2022.
+[34]
+L. Elneser, X. Wen, G. Seepersad, M. Horton, and Y. Yi “Can
+co-location and community CORS add value to GNSS data?,”
+in FIG Working Week 2023: Protecting Our World, Conquering
+New Frontiers, Orlando, FL, USA, May 28–June 1 2023.
+[35]
+W Stempfhuber and M Buchholz “A precise, low-cost RTK GNSS
+system for UAV applications,” The International Archives of
+the Photogrammetry, Remote Sensing and Spatial Information
+Sciences, vol. 38, pp. 289–293, 2012.
+[36]
+Umberto Robustelli, Matteo Cutugno, and Giovanni Pugliano
+“Low-cost GNSS and PPP-RTK: Investigating the capabilities
+of the u-blox ZED-F9P module,” Sensors, vol. 23, no. 13, pp.
+6074, 2023.
+[37]
+Xingxing Li, Hailong Gou, Xin Li, Zhiheng Shen, Hongbo Lyu,
+Yuxuan Zhou, Hao Wang, and Qian Zhang “Performance analy-
+sis of frequency-mixed PPP-RTK using low-cost GNSS chipset
+with different antenna configurations,” Satellite Navigation, vol.
+4, no. 1, pp. 26, 2023.
+[38]
+Mike Horton, David Chen, Yudan Yi, Xiaohua Wen, and James
+Doebbler “GEODNET: Global Earth observation decentralized
+network,” NAVIGATION: Journal of the Institute of Navigation,
+vol. 70, no. 4, 2023.
+[39]
+Xingwang Zhao, Yulong Ge, Fuyang Ke, Chao Liu, and Fangchao
+Li “Investigation of real-time kinematic multi-gnss precise point
+positioning with the cnes products,” Measurement, vol. 166, pp.
+108231, 2020.
+[40]
+Ignacio Fernandez-Hernandez, Adri´an Chamorro-Moreno, Sim´on
+Cancela-Diaz, J David Calle-Calle, Paolo Zoccarato, Daniel
+Blonski, Tommaso Senni, F Javier de Blas, Carmelo Hern´andez,
+Javier Sim´on, et al. “Galileo high accuracy service: initial
+definition and performance,” GPS solutions, vol. 26, no. 3, pp.
+65, 2022.
+[41]
+Guenter Heinrichs, Paolo Mulassano, and Fabio Dovis “A hybrid
+positioning algorithm for cellular radio networks by using
+a common rake receiver architecture,” in 2004 IEEE 15th
+International Symposium on Personal, Indoor and Mobile Radio
+12
+This work has been submitted for possible publication.
+VOL. XX, No. XX
+XXXXX 2025
+Communications (IEEE Cat. No. 04TH8754). IEEE, 2004,
+vol. 4, pp. 2347–2351.
+[42]
+R Michael Buehrer, Henk Wymeersch, and Reza Monir Vaghefi
+“Collaborative sensor network localization: Algorithms and
+practical issues,” Proceedings of the IEEE, vol. 106, no. 6, pp.
+1089–1114, 2018.
+[43]
+Henk Wymeersch, Jaime Lien, and Moe Z Win “Cooperative
+localization in wireless networks,” Proceedings of the IEEE,
+vol. 97, no. 2, pp. 427–450, 2009.
+[44]
+Thang Van Nguyen, Youngmin Jeong, Hyundong Shin, and Moe Z
+Win “Least square cooperative localization,” IEEE Transactions
+on Vehicular Technology, vol. 64, no. 4, pp. 1318–1330, 2015.
+[45]
+Neil Gogoi, Alex Minetto, and Fabio Dovis “On the cooperative
+ranging between android smartphones sharing raw GNSS mea-
+surements,” in IEEE 90th Vehicular Technology Conference.
+IEEE, 2019, pp. 1–5.
+[46]
+Lucy Icking and Steffen Sch¨on “Optimal combination of multi-
+agent smartphone GNSS observations for improved collabo-
+rative positioning in urban areas,” in Proceedings of the 35th
+International Technical Meeting of the Satellite Division of The
+Institute of Navigation (ION GNSS+ 2022), 2022, pp. 2860–
+2870.
+[47]
+Duojie Weng, Xingli Gan, Wu Chen, Shengyue Ji, and Yangwei
+Lu “A new DGNSS positioning infrastructure for Android
+smartphones,” Sensors, vol. 20, no. 2, pp. 487, 2020.
+[48]
+Alex Minetto, Andrea Nardin, and Fabio Dovis “GNSS-only
+collaborative positioning among connected vehicles,” in Pro-
+ceedings of the 1st ACM MobiHoc Workshop, 2019, pp. 37–42.
+[49]
+Chen Zhuang, Hongbo Zhao, Shan Hu, Wenquan Feng, and
+Rongke Liu “Cooperative positioning for V2X applications
+using GNSS carrier phase and UWB ranging,” IEEE Commu-
+nications Letters, vol. 25, no. 6, pp. 1876–1880, 2021.
+[50]
+Davide Dardari, Pau Closas, and Petar M Djuri´c “Indoor tracking:
+Theory, methods, and technologies,” IEEE Transactions on
+Vehicular Technology, vol. 64, no. 4, pp. 1263–1278, 2015.
+[51]
+Lintong Li, Mireille Elhajj, Yuxiang Feng, and Washington Yotto
+Ochieng “Machine learning based GNSS signal classification
+and weighting scheme design in the built environment: a
+comparative experiment,” Satellite Navigation, vol. 4, no. 1,
+pp. 12, 2023.
+[52]
+Siddharth Tanwar and Grace Xingxin Gao “Decentralized collab-
+orative localization in urban environments using 3D-mapping-
+aided (3DMA) GNSS and inter-agent ranging,” in Proceedings
+of the 31st International Technical Meeting of the Satellite
+Division of The Institute of Navigation (ION GNSS+ 2018),
+2018, pp. 2352–2363.
+[53]
+Guillermo Hernandez, Gerald LaMountain, and Pau Closas
+“Privacy-preserving cooperative positioning,” in Proceedings
+of the 33rd International Technical Meeting of the Satellite
+Division of The Institute of Navigation (ION GNSS+ 2020),
+2020, pp. 2667–2675.
+[54]
+Helena Calatrava, Daniel Medina, and Pau Closas “Towards ro-
+bust collaborative DGNSS in the presence of outliers,” in
+2025 IEEE/ION Position, Location and Navigation Symposium
+(PLANS). IEEE, 2025, pp. 328–336.
+[55]
+Heidi Kuusniemi, Andreas Wieser, Gerard Lachapelle, and Jarmo
+Takala “User-level reliability monitoring in urban personal
+satellite-navigation,” IEEE Transactions on Aerospace and
+Electronic Systems, vol. 43, no. 4, pp. 1305–1318, 2008.
+[56]
+Daniel Medina, Kasia Gibson, Ralf Ziebold, and Pau Closas “De-
+termination of pseudorange error models and multipath char-
+acterization under signal-degraded scenarios,” in ION GNSS+,
+The International Technical Meeting of the Satellite Division of
+The Institute of Navigation, 2018.
+[57]
+Bradley M Bell and Frederick W Cathey “The iterated Kalman
+filter update as a Gauss-Newton method,” IEEE Transactions
+on Automatic Control, vol. 38, no. 2, pp. 294–297, 1993.
+[58]
+Daniel Medina, Jordi Vil`a-Valls, Eric Chaumette, Franc¸ois Vincent,
+and Pau Closas “Cram´er-Rao bound for a mixture of real-and
+integer-valued parameter vectors and its application to the linear
+regression model,” Signal Processing, vol. 179, pp. 107792,
+2021.
+Helena Calatrava (Student Member, IEEE)
+received the B.S. and M.S. degrees in Electrical
+Engineering from UPC in 2020 and 2022, re-
+spectively. She is currently a Ph.D. candidate in
+Electrical and Computer Engineering at North-
+eastern University, Boston, MA. Her research
+focuses on statistical and robust signal process-
+ing, machine learning, and multitarget tracking
+algorithms to improve resilience in satellite-
+based navigation and radar-based localization
+systems, with an emphasis on cooperative and distributed architectures.
+Daniel Medina
+received the M.S. and Ph.D.
+degrees in Computer Science from Universi-
+dad Carlos III de Madrid (UC3M), in 2016
+and 2022, respectively. He is currently a Re-
+search Fellow with the Institute of Commu-
+nications and Navigation, German Aerospace
+Center (DLR), where he leads the Multi-Sensor
+Systems Research Group. His research interests
+include statistical signal processing, robust fil-
+tering and estimation, LiDAR perception, and
+high-precision satellite-based navigation. He currently serves as Vice-
+Chair of the IEEE ITSS German Chapter.
+Pau Closas (Senior Member, IEEE), is an
+Associate Professor in Electrical and Com-
+puter Engineering at Northeastern University,
+Boston MA. He received the MS and PhD
+in Electrical Engineering from UPC in 2003
+and 2009, respectively, and a MS in Advanced
+Mathematics from UPC in 2014. His primary
+areas of interest include statistical signal pro-
+cessing and machine learning, with applications
+to positioning and localization systems.
+CALATRAVA ET AL.: ESTIMATORS AND BOUNDS FOR COOPERATIVE DIFFERENTIAL GNSS POSITIONING
+13
+Supplemental Material for
+“Cooperative Differential GNSS Positioning: Estimators and Bounds”
+Helena Calatrava, Daniel Medina, Pau Closas
+Note that sections, equations, and tables in this supplement are prefixed with “S”. References without this prefix
+correspond to the main paper. Notation follows as in the main paper.
+Recall that, in this work, we assume a network composed of one surveyed, and potentially low-cost, reference
+station (indexed by b) and N user receivers (indexed by r ∈{1, . . . , N}), as illustrated in Fig. 1. The reference station
+observes a set of K satellites (indexed by s ∈{p, 1, . . . , K−1}), where p denotes the pivot satellite used for double
+differencing, and each user receiver is assumed to observe all or a subset of these satellites depending on visibility
+conditions.
+Throughout these derivations, we make use of the following Kronecker-product identities, which enable convenient
+manipulation of matrices whose dimensions grow with the cooperative nature of the algorithm:
+• Transpose identity: (A ⊗B)⊤= A⊤⊗B⊤.
+• Inverse identity (for invertible A and B): (A ⊗B)−1 = A−1 ⊗B−1.
+• Mixed-product property: (A⊗B)(C ⊗D) = (AC)⊗(BD), whenever the products AC and BD are well defined.
+SI. Expanded Form of the Observation and Covariance Matrices
+A. Single-User Model
+Recall the single-user observation model defined in (10):
+∆ρr = Hr δxr + c dt + Tr + Ir + εr ∈RK,
+∆Φr = Hr δxr + c dt + Tr −Ir + λNr + ϵr ∈RK.
+(S1)
+We expand the observation matrix hereafter for the sake of subsequent derivations (recall that we assume Hr = H, ∀r):
+H = [E, 1¯K] =
+
+
+−(e1)⊤
+1
+−(e2)⊤
+1
+...
+...
+−(eK)⊤
+1
+
+=
+
+
+−e1
+x
+−e1
+y
+−e1
+z
+−e2
+x
+−e2
+y
+−e2
+z
+...
+...
+...
+−eK
+x
+−eK
+y
+−eK
+z
+|
+{z
+}
+E
+1
+1
+...
+1
+
+
+∈RK×4,
+(S2)
+where es = −(ps −p0)/∥ps −p0∥∈R3 is the satellite–receiver line-of-sight (LOS) unit vector. For each user r, the
+individual code and carrier-phase error covariances are
+Σρ,r = σ2
+ρ W−1
+r
+=
+
+
+(σp
+ρ,r)2
+(σ1
+ρ,r)2
+...
+(σK−1
+ρ,r
+)2
+
+,
+ΣΦ,r = σ2
+Φ W−1
+r
+=
+
+
+(σp
+Φ,r)2
+(σ1
+Φ,r)2
+...
+(σK−1
+Φ,r )2
+
+,
+(S3)
+where σ2
+ρ and σ2
+Φ denote the common code and phase variances, and Wr is the weighting matrix (accounting for
+elevation). The superscript (·)k indicates the measurement-specific variance for the k-th satellite, which depends on
+its elevation angle.
+B. Multi-User Model
+The network-stacked quantities, based on the operator in (2), are as follows:
+∆˜ρ ≜
+
+
+∆ρb
+∆ρ1
+...
+∆ρN
+
+,
+∆˜Φ ≜
+
+
+∆Φb
+∆Φ1
+...
+∆ΦN
+
+,
+˜ε ≜
+
+
+εb
+ε1
+...
+εN
+
+∈RK(N+1),
+δ˜x ≜
+
+
+δxb
+δx1
+...
+δxN
+
+∈R4(N+1).
+(S4)
+Recall that ˜Σρ = E{˜ε˜εT} = diag(Σρ,b, Σρ,1, . . . , Σρ,N) ∈RK(N+1)×K(N+1). An analogous expression holds for
+˜ΣΦ.
+14
+This work has been submitted for possible publication.
+VOL. XX, No. XX
+XXXXX 2025
+C. C-DGNSS Model
+• Observation matrix: The single-difference (SD) operator applied across the network has the Kronecker form
+˜Db = [−1¯N ⊗IK, IN ⊗IK] =
+
+
+−IK
+IK
+0
+· · ·
+0
+−IK
+0
+IK
+· · ·
+0
+...
+...
+...
+...
+...
+−IK
+0
+· · ·
+0
+IK
+
+∈RKN×K(N+1),
+(S5)
+where it is assumed for convenience that the base measurements occupy the first block in the stacked measurement
+vector.
+Applying ˜Db to the stacked pseudorange differences yields the C-DGNSS observation model as
+˜Db ∆˜ρ =
+
+
+∆ρ1 −∆ρb
+...
+∆ρN −∆ρb
+
+=
+
+
+H(δx1 −δxb)
+...
+H(δxN −δxb)
+
++ ˜εb
+(S6)
+=
+
+
+H
+...
+H
+
+
+
+
+δx1 −δxb
+...
+δxN −δxb
+
++ ˜εb =
+˜HN δ˜xb + ˜εb ≜∆˜ρb ∈RKN
+.
+(S7)
+• Covariance matrix: The C-DGNSS covariance matrix can be calculated as
+˜Σb,ρ = E{˜εb ˜εT
+b } = ˜Db ˜Σρ ˜D⊤
+b
+(S8)
+=
+(
+Σρ,i + Σρ,b,
+i = j,
+Σρ,b,
+i ̸= j.
+(S9)
+˜Σb,ρ =
+
+
+Σρ,1 + Σρ,b
+Σρ,b
+· · ·
+Σρ,b
+Σρ,b
+Σρ,2 + Σρ,b
+· · ·
+Σρ,b
+...
+...
+...
+...
+Σρ,b
+Σρ,b
+· · ·
+Σρ,N + Σρ,b
+
+
+(S10)
+Here, the diagonal blocks capture intra-user terms, with diagonal entries reflecting the combined base–user variance
+for each satellite and zero off-diagonals. The off-diagonal blocks contain only base-station noise: their diagonals
+include the base variance for each satellite, and their off-diagonals are zero, indicating no inter-user cross-correlation
+beyond the shared base.
+• Other quantities: The following expanded expressions make explicit the stacking, differencing, and matrix
+structure underlying the compact model in (13).
+∆˜ρb ≜
+
+
+∆ρb1
+...
+∆ρbN
+
+=
+
+
+∆ρ1 −∆ρb
+...
+∆ρN −∆ρb
+
+∈RKN,
+∆˜Φb ≜
+
+
+∆Φb1
+...
+∆ΦbN
+
+=
+
+
+∆Φ1 −∆Φb
+...
+∆ΦN −∆Φb
+
+∈RKN,
+δ˜xb ≜
+
+
+δxb1
+...
+δxbN
+
+=
+
+
+δx1 −δxb
+...
+δxN −δxb
+
+∈R4N, ˜εb ≜
+
+
+˜εb1
+...
+˜εbN
+
+=
+
+
+ε1 −εb
+...
+εN −εb
+
+∈RKN, ˜ϵb ≜
+
+
+˜ϵb1
+...
+˜ϵbN
+
+=
+
+
+ϵ1 −ϵb
+...
+ϵN −ϵb
+
+∈RKN.
+(S11)
+D. C-RTK Model
+• Observation matrix: The double-difference (DD) operator applied across the network has the form
+Dp = [ −1K−1, IK−1 ] =
+
+
+−1
+1
+0
+· · ·
+0
+−1
+0
+1
+· · ·
+0
+...
+...
+...
+...
+...
+−1
+0
+0
+· · ·
+1
+
+∈R(K−1)×K,
+˜Dp = IN ⊗Dp =
+
+
+Dp
+0
+· · ·
+0
+0
+Dp
+· · ·
+0
+...
+...
+...
+...
+0
+0
+· · ·
+Dp
+
+∈R(K−1)N×KN,
+(S12)
+where it is assumed for convenience that the pivot measurements occupy the first block in the stacked measurement
+vector.
+CALATRAVA ET AL.: ESTIMATORS AND BOUNDS FOR COOPERATIVE DIFFERENTIAL GNSS POSITIONING
+15
+Applying the pivot-differencing operator to the stacked SD observations in (S6) gives
+˜Dp ∆˜ρb = (IN ⊗Dp)(IN ⊗H)
+|
+{z
+}
+IN⊗(DpH)
+δ˜xb + ˜εb =
+
+
+DpH δxb1
+...
+DpH δxbN
+
+
+|
+{z
+}
+(S14)
++˜εb =
+˜Dp ˜EN ˜b + ˜εp
+b ≜∆ρp
+b ∈R(K−1)N
+.
+(S13)
+Note that here we use
+
+
+DpH δxb1
+...
+DpH δxbN
+
+=
+
+
+Dp
+...
+Dp
+
+
+
+
+H
+...
+H
+
+δ˜xb =
+
+
+Dp
+...
+Dp
+
+
+
+
+E
+...
+E
+
+δ˜pb,
+(S14)
+where the equivalence in the second equality can be understood from:
+DpHδxbr =
+
+
+(e1 −ep)⊤
+0
+(e2 −ep)⊤
+0
+...
+...
+(eK −ep)⊤
+0
+
+
+|
+{z
+}
+∈R(K−1)×4
+
+pr −pb
+c (dtr −dtb)
+
+=
+
+
+(e1 −ep)⊤
+(e2 −ep)⊤
+...
+(eK −ep)⊤
+
+
+|
+{z
+}
+∈R(K−1)×3
+(pr −pb) = DpEδpbr.
+(S15)
+Furthermore, note that we use ˜b = δ˜pb to refer to the full-network baseline vector (between the base station b and
+each receiver).
+• Covariance matrix: The C-RTK covariance matrix can be calculated as
+˜Dp ˜Σb,ρ ˜DT
+p =
+
+
+Dp
+...
+Dp
+
+
+
+
+Σρ,1 + Σρ,b
+Σρ,b
+· · ·
+Σρ,b
+Σρ,b
+Σρ,2 + Σρ,b
+· · ·
+Σρ,b
+...
+...
+...
+...
+Σρ,b
+Σρ,b
+· · ·
+Σρ,N + Σρ,b
+
+
+
+
+DT
+p
+...
+DT
+p
+
+
+(S16)
+=
+
+
+
+Dp(Σρ,i + Σρ,b)D⊤
+p ,
+i = j,
+DpΣρ,bD⊤
+p ,
+i ̸= j.
+≜
+˜Σp
+b,ρ
+.
+(S17)
+An analogous expression holds for ˜Σp
+b,Φ. From this expression, we study how the noise contributions from the base
+station and each user appear within the block-diagonal covariance structure for the C-RTK model (see Fig. 3).
+Diagonal blocks of ˜Σp
+b,ρ (i = j):
+Dp(Σρ,i + Σρ,b)D⊤
+p = Dp
+
+
+(σp
+ρ,i)2 + (σp
+ρ,b)2
+(σ1
+ρ,i)2 + (σ1
+ρ,b)2
+...
+(σK−1
+ρ,i
+)2 + (σK−1
+ρ,b
+)2
+
+DT
+p
+(S18)
+=
+
+
+−(σp
+ρ,i)2 −(σp
+ρ,b)2
+(σ1
+ρ,i)2 + (σ1
+ρ,b)2
+...
+...
+−(σp
+ρ,i)2 −(σp
+ρ,b)2
+(σK−1
+ρ,i
+)2 + (σK−1
+ρ,b
+)2
+
+
+
+
+−1
+· · ·
+−1
+1
+...
+1
+
+
+(S19)
+=
+(
+(σp
+ρ,i)2 + (σp
+ρ,b)2 + (σi
+ρ,i)2 + (σi
+ρ,b)2,
+i = j,
+(σp
+ρ,i)2 + (σp
+ρ,b)2,
+i ̸= j.
+(S20)
+The diagonal blocks capture the intra-user correlation terms: their diagonal entries contain a fourfold variance
+contribution (from both the base and the user at the pivot satellite, and from both the base and the user at the
+corresponding satellite), and the off-diagonal elements contain a twofold contribution arising solely from the pivot-
+satellite terms (from base and user).
+16
+This work has been submitted for possible publication.
+VOL. XX, No. XX
+XXXXX 2025
+Off-diagonal blocks of ˜Σp
+b,ρ (i ̸= j):
+DpΣρ,bD⊤
+p = Dp
+
+
+(σp
+ρ,b)2
+(σ1
+ρ,b)2
+...
+(σK−1
+ρ,b
+)2
+
+DT
+p =
+(
+(σp
+ρ,b)2 + (σi
+ρ,b)2,
+i = j,
+(σp
+ρ,b)2,
+i ̸= j.
+(S21)
+The off-diagonal blocks encode the inter-user correlation terms and contain only contributions from the base-station
+noise. Within each block, the diagonal entries exhibit a twofold contribution from the base station (one term associated
+with the common satellite and one with the pivot), whereas the off-diagonal entries include only the pivot-satellite
+contribution.
+SII. Full Derivation of the Parameterized Fisher Information Matrix
+In this section, we present the complete derivations leading to ˜R−1 in (S30) and to the Fisher information matrix
+(FIM) J(˜ω) in (45), as referenced in Sec. IV–B. The expressions of the coefficients βi(α), i ∈{0, 1, . . . , 5} listed
+in Table VI are also derived. Importantly, the network clustering model presented in Sec. IV-A must be considered
+hereafter.
+A. Covariance Matrix Inverse
+We first derive the expression of ˜R−1 for arbitrary No and α via the Schur complement of (40), where we use
+X = (1 + α)Rc, Y = Pα
+No = 1¯
+⊤
+No ⊗
+
+αRc
+0Kc, Ko
+
+, and Z = ˜Cα
+No ⊗R, and denote the four blocks of ˜R−1 by
+[ ˜R−1]ij for i, j ∈{1, 2}.
+• Step 1 (top-diagonal block): To obtain [ ˜R−1]11 = (X −YZ−1Y⊤)−1, let us start by calculating Z−1 as:
+Z−1 = ( ˜Cα
+No ⊗R)−1 = [INo + α1No]−1 ⊗R−1 =
+
+INo −
+α
+αNo + 11No
+
+|
+{z
+}
+Γ1
+⊗R−1,
+(S22)
+The diagonal and off-diagonal elements of the auxiliary matrix Γ1 are 1+α(No−1)
+αNo+1
+and −
+α
+αNo+1, respectively. In the
+last equality, we have used the Sherman–Morrison formula, which allows the inversion of a rank-one modification of
+the identity matrix as
+(I + uv⊤)−1 = I −
+uv⊤
+1 + v⊤u,
+(S23)
+with u = v = √α1¯No. Now we left-multiply by matrix Y = Pα
+No =
+
+1¯
+T
+No ⊗
+
+αRc
+0Kc,Ko
+
+:
+YZ−1 =
+
+1¯
+T
+No ⊗
+
+αRc
+0Kc,Ko
+  Γ1 ⊗R−1
+=
+
+1¯
+T
+NoΓ1
+
+⊗
+
+
+
+
+
+αRc
+0Kc,Ko
+ 
+R−1
+c
+0
+0
+R−1
+o
+
+|
+{z
+}
+R−1
+
+
+
+
+=
+
+1
+αNo + 11¯
+T
+No
+
+⊗
+
+RcR−1
+c
+0Kc,Ko
+
+= α
+1
+αNo + 1
+|
+{z
+}
+β0(α)
+
+1¯
+T
+No ⊗
+
+IKc
+0Kc,Ko
+
+,
+(S24)
+where we have used 1¯
+T
+NoΓ1 =
+
+1+α(No−1)
+αNo+1
+−PNo−1
+i=1
+α
+αNo+1
+
+1¯
+T
+No =
+1
+αNo+11¯
+T
+No, which follows from summing the
+diagonal and off-diagonal contributions of Γ1. Now we can calculate
+[ ˜R−1]11 = (X −YZ−1Y⊤)−1 =
+
+(1 + α)Rc −αβ0(α)
+
+1¯
+T
+No ⊗
+
+IKc
+0Kc,Ko
+ 
+1¯No ⊗
+
+αRc
+0Ko,Kc
+−1
+=
+
+
+
+
+(1 + α)Rc −αβ0(α) (1¯
+T
+No1¯No)
+|
+{z
+}
+No
+⊗
+
+IKc
+0Kc,Ko
+ 
+αRc
+0Ko,Kc
+
+|
+{z
+}
+αRc
+
+
+
+
+
+−1
+=
+ (1 + α)Rc −α2β0(α)NoRc
+−1
+= (1 + α −α2β0(α)No)−1R−1
+c
+=
+αNo + 1
+αNo + α + 1
+|
+{z
+}
+β1(α)
+R−1
+c .
+(S25)
+CALATRAVA ET AL.: ESTIMATORS AND BOUNDS FOR COOPERATIVE DIFFERENTIAL GNSS POSITIONING
+17
+• Step 2 (off-diagonal blocks): The blocks [ ˜R−1]12 and [ ˜R−1]21 are calculated as:
+[ ˜R−1]12 = [ ˜R−1]⊤
+21 = −[ ˜R−1]11 YZ−1 = −αβ0(α)β1(α)R−1
+c
+
+1¯
+T
+No ⊗
+
+IKc
+0Kc,Ko
+
+= −
+α
+αNo + α + 1
+|
+{z
+}
+β2(α)
+
+1¯
+T
+No ⊗
+
+R−1
+c
+0Kc,Ko
+
+.
+(S26)
+• Step 3 (bottom-diagonal block): To calculate [ ˜R−1]22 = Z−1 −Z−1Y⊤[ ˜R−1]12, we start calculating the term
+Z−1Y⊤[ ˜R−1]12 = αβ0(α)β2(α)
+|
+{z
+}
+β3(α)
+
+1¯No ⊗
+
+IKc
+0Ko,Kc
+ 
+1¯
+T
+No ⊗
+
+R−1
+c
+0Kc,Ko
+
+= β3(α)
+
+1¯No1¯
+T
+No
+
+|
+{z
+}
+1No
+⊗
+
+R−1
+c
+0Kc,Ko
+0Ko,Kc
+0Ko
+
+= β3(α)
+
+
+
+R−1
+c
+0Kc,Ko
+0Ko,Kc
+0Ko
+
+· · ·
+
+R−1
+c
+0Kc,Ko
+0Ko,Kc
+0Ko
+
+...
+...
+...
+
+R−1
+c
+0Kc,Ko
+0Ko,Kc
+0Ko
+
+· · ·
+
+R−1
+c
+0Kc,Ko
+0Ko,Kc
+0Ko
+
+
+
+,
+(S27)
+and now we can calculate
+[ ˜R−1]22 = Z−1 −Z−1Y⊤[ ˜R−1]12 = Γ1 ⊗R−1 −β3(α)1No ⊗
+
+R−1
+c
+0Kc,Ko
+0Ko,Kc
+0Ko
+
+=
+
+
+1 + α(No −1)
+αNo + 1
+|
+{z
+}
+β4(α)
+R−1
+· · ·
+−
+α
+αNo + 1
+|
+{z
+}
+β5(α)
+R−1
+...
+...
+...
+−
+α
+αNo + 1 R−1
+· · ·
+1 + α(No −1)
+αNo + 1
+R−1
+
+
+−β3(α)
+
+
+
+R−1
+c
+0Kc,Ko
+0Ko,Kc
+0Ko
+
+· · ·
+
+R−1
+c
+0Kc,Ko
+0Ko,Kc
+0Ko
+
+...
+...
+...
+
+R−1
+c
+0Kc,Ko
+0Ko,Kc
+0Ko
+
+· · ·
+
+R−1
+c
+0Kc,Ko
+0Ko,Kc
+0Ko
+
+
+
+=
+
+
+
+β3,4(α)R−1
+c
+0Kc,Ko
+0Ko,Kc
+β4(α)R−1
+o
+
+· · ·
+
+β3,5(α)R−1
+c
+0Kc,Ko
+0Ko,Kc
+β5(α)R−1
+o
+
+...
+...
+...
+
+β3,5(α)R−1
+c
+0Kc,Ko
+0Ko,Kc
+β5(α)R−1
+o
+
+· · ·
+
+β3,4(α)R−1
+c
+0Kc,Ko
+0Ko,Kc
+β4(α)R−1
+o
+
+
+
+= IN ⊗F1 + (1N −IN) ⊗F2.
+(S28)
+Here, βi,j(α) = βj(α) −βi(α). Note that β3,4(α) = β1(α) and β3,5(α) = β2(α). Additionally, in the last equality, we
+have reduced to a more compact form by using the following matrices:
+Fm = βm+3(α)
+
+R−1
+c
+0Kc,Ko
+0Ko,Kc R−1
+o
+
+−β3(α)
+
+R−1
+c
+0Kc,Ko
+0Ko,Kc 0Ko
+
+=
+
+β3,m+3(α)R−1
+c
+0Kc,Ko
+0Ko,Kc
+βm+3(α)R−1
+o
+
+∀m ∈{1, 2}.
+(S29)
+• Step 4 (final expression): The expanded expression for ˜R−1 is as follows (by putting together the blocks
+calculated in the previous steps):
+˜R−1 =
+
+
+β1(α) R−1
+c
+|
+{z
+}
+[ ˜R−1]11
+
+β2(α) R−1
+c
+0Kc,Ko
+
+· · ·
+
+β2(α) R−1
+c
+0Kc,Ko
+
+|
+{z
+}
+[ ˜R−1]12
+
+
+
+β2(α) R−1
+c
+0Ko,Kc
+
+...
+
+β2(α) R−1
+c
+0Ko,Kc
+
+
+
+|
+{z
+}
+[ ˜R−1]21
+
+
+
+β1(α)R−1
+c
+0Kc,Ko
+0Ko,Kc
+β4(α)R−1
+o
+
+· · ·
+
+β2(α)R−1
+c
+0Kc,Ko
+0Ko,Kc
+β5(α)R−1
+o
+
+...
+...
+...
+
+β2(α)R−1
+c
+0Kc,Ko
+0Ko,Kc
+β5(α)R−1
+o
+
+· · ·
+
+β1(α)R−1
+c
+0Kc,Ko
+0Ko,Kc
+β4(α)R−1
+o
+
+
+
+|
+{z
+}
+[ ˜R−1]22
+
+
+.
+(S30)
+18
+This work has been submitted for possible publication.
+VOL. XX, No. XX
+XXXXX 2025
+TABLE VI: βi(α) coefficient definitions.
+β0
+β1
+β2
+β3
+β4
+β5
+Compact
+—
+(αβ0 + 1)−1
+−αβ1β0
+αβ2β0
+1 −αβ0
+−αβ0
+Full
+1
+1 + αNo
+αNo + 1
+αNo + α + 1
+−
+α
+αNo + α + 1
+−
+α2
+(1 + αNo)(αNo + α + 1)
+1 + α(No −1)
+αNo + 1
+−
+α
+αNo + 1
+B. Fisher Information Matrix (FIM)
+The FIM follows directly from the unified linear model in (29). Owing to the block structure of ˜R−1 in (S30),
+multiplication by ˜G preserves this structure and maps each block of ˜R−1 into the corresponding block of J(ω). This
+yields the compact expression in (45), which is used in Sec. IV–C to analyze the asymptotic performance of the
+C-DGNSS/C-RTK estimators.
+J(ω) = ˜GT ˜R−1 ˜G =
+"
+G⊤
+c
+0Mω,Kc
+0Kc,Mω
+INo ⊗
+
+G⊤
+c
+G⊤
+o
+
+#
+˜R−1
+
+
+Gc
+0Kc,Mω
+0Mω,Kc
+INo ⊗
+Gc
+Go
+
+
+
+(S31)
+• Step 1 (top-diagonal block):
+[J(ω)]11 = GT
+c [ ˜R−1]11Gc = β1(α)GT
+c R−1
+c Gc =
+β1(α)Jc ≜M11
+,
+(S32)
+where Jc is the constrained-user FIM defined in (42), together with the Jo representing the exclusive information for
+aiding users.
+• Step 2 (off-diagonal blocks):
+GT
+
+β2(α) R−1
+c
+0Ko,Kc
+
+Gc =
+
+G⊤
+c
+G⊤
+o
+ 
+β2(α) R−1
+c
+0Ko,Kc
+
+Gc = β2(α)GT
+c R−1
+c Gc = β2(α)Jc.
+(S33)
+[J(ω)]21 = [J(ω)]T
+12 = 1¯No ⊗(β2(α)Jc) =
+β2(α)(1¯No ⊗Jc) ≜M21 = MT
+12
+.
+(S34)
+• Step 3 (bottom-diagonal blocks): The block M22 is given by
+M22 =
+ INo ⊗GT
+
+
+
+β1(α)R−1
+c
+0Kc,Ko
+0Ko,Kc
+β4(α)R−1
+o
+
+· · ·
+
+β2(α)R−1
+c
+0Kc,Ko
+0Ko,Kc
+β5(α)R−1
+o
+
+...
+...
+...
+
+β2(α)R−1
+c
+0Kc,Ko
+0Ko,Kc
+β5(α)R−1
+o
+
+· · ·
+
+β1(α)R−1
+c
+0Kc,Ko
+0Ko,Kc
+β4(α)R−1
+o
+
+
+
+|
+{z
+}
+[R−1]22
+(INo ⊗G) ,
+(S35)
+where we can see two contributions: one from multiplying G⊤with the diagonal terms of [R−1]22, and another from
+multiplying G⊤with its off-diagonal terms. We calculate each of these contributions and add them up, as follows:
+Diagonal contribution: GT
+
+β1(α)R−1
+c
+0Kc,Ko
+0Ko,Kc
+β4(α)R−1
+o
+
+G =
+
+β1(α)G⊤
+c R−1
+c
+β4(α)G⊤
+o R−1
+o
+ Gc
+Go
+
+(S36)
+= β1(α)G⊤
+c R−1
+c Gc + β4(α)G⊤
+o R−1
+o Go = β1(α)Jc + β4(α)Jo,
+(S37)
+Off-diagonal contribution: GT
+
+β2(α)R−1
+c
+0Kc,Ko
+0Ko,Kc
+β5(α)R−1
+o
+
+G =
+
+β2(α)G⊤
+c R−1
+c
+β5(α)G⊤
+o R−1
+o
+ Gc
+Go
+
+(S38)
+= β2(α)G⊤
+c R−1
+c Gc + β5(α)G⊤
+o R−1
+o Go = β2(α)Jc + β5(α)Jo.
+(S39)
+To integrate these calculations into the full block, we use
+M22 = INo ⊗(β1(α)Jc + β4(α)Jo) + (1No −INo) ⊗(β2(α)Jc + β5(α)Jo)
+(S40)
+=
+(INo + β2(α) 1No)⊗Jc + (INo + β5(α) 1No)⊗Jo = M22
+.
+(S41)
+CALATRAVA ET AL.: ESTIMATORS AND BOUNDS FOR COOPERATIVE DIFFERENTIAL GNSS POSITIONING
+19

@@ -1,0 +1,1017 @@
+MOBILITY TRAJECTORIES FROM NETWORK-DRIVEN MARKOV
+DYNAMICS
+DAVID A. MEYER†, ASIF SHAKEEL†
+Abstract. We present a generative model of human mobility in which trajectories arise
+as realizations of a prescribed, time-dependent Markov dynamics defined on a spatial inter-
+action network. The model constructs a hierarchical routing structure with hubs, corridors,
+feeder paths, and metro links, and specifies transition matrices using gravity-type distance
+decay combined with externally imposed temporal schedules and directional biases. Popu-
+lation mass evolves as indistinguishable, memoryless movers performing a single transition
+per time step.
+When aggregated, the resulting trajectories reproduce structured origin-destination flows
+that reflect network geometry, temporal modulation, and connectivity constraints. By ap-
+plying the Perron-Frobenius theorem to the daily evolution operator, we identify a unique
+periodic invariant population distribution that serves as a natural non-transient reference
+state. We verify consistency between trajectory-level realizations and multi-step Markov dy-
+namics, showing that discrepancies are entirely attributable to finite-population sampling.
+The framework provides a network-centric, privacy-preserving approach to generating mo-
+bility trajectories and studying time-elapsed flow structure without invoking individual-level
+behavioral assumptions.
+1. Introduction
+Human mobility modeling has traditionally relied on individual-level trajectories obtained
+from GPS traces, mobile phone records, or travel diaries. Early empirical studies demon-
+strated strong regularities in individual movement, including heavy-tailed displacement dis-
+tributions and recurrent visitation patterns, suggesting a high degree of predictability in
+human mobility [1, 2].
+These findings motivated trajectory-based models that explicitly
+encode individual behavior over time.
+A central class of such models is the exploration–preferential return framework introduced
+by Song et al. [3,4], in which agents alternate between exploring new locations and returning
+to previously visited ones with reinforcement proportional to visitation frequency. Variants
+of this approach incorporate circadian rhythms, activity schedules, or purpose-driven travel,
+and are designed to reproduce empirical statistics such as visitation heterogeneity and radius
+of gyration [5]. These models are inherently non-Markovian: transition probabilities depend
+on the full visitation history of each agent, and agents are therefore not interchangeable.
+†Department of Mathematics, University of California, San Diego, La Jolla, CA 92093-
+0112, USA
+E-mail address: dmeyer@math.ucsd.edu, ashakeel@ucsd.edu.
+Key words and phrases.
+human mobility modeling, network-driven dynamics, time-dependent Markov
+chains, origin–destination flows, trajectory generation, spatial interaction networks, hierarchical mobility
+networks, corridor and hub structure, synthetic mobility trajectories, aggregate flow models.
+1
+arXiv:2601.06020v1  [cs.SI]  9 Jan 2026
+2
+MOBILITY TRAJECTORIES FROM NETWORK-DRIVEN MARKOV DYNAMICS
+In parallel, flow-based mobility models focus on aggregate origin–destination patterns
+rather than individual trajectories. Gravity models and the radiation model describe population-
+level flows as functions of distance, population, or intervening opportunities [6]. While suc-
+cessful at reproducing large-scale mobility patterns, these approaches are essentially static:
+they specify expected flows over a given interval but do not define an explicit dynamical
+process evolving in time, nor do they generate realizations that can be interpreted as paths.
+Viewed dynamically, aggregate origin–destination flows naturally define a stochastic pro-
+cess on a network. When interpreted as time-dependent Markov transition matrices, such
+flows specify how population mass redistributes over successive time steps. In most existing
+applications, however, these Markov dynamics are either assumed time-homogeneous, left
+implicit, or inferred retrospectively from individual trajectory data [5], making the stochastic
+process primarily descriptive rather than prescribed.
+In this paper, we reverse this perspective and treat the Markov dynamics itself as the
+primary modeling object. We prescribe a time-dependent, network-driven Markov process
+directly from spatial geometry, hierarchical connectivity, and externally imposed temporal bi-
+ases, rather than inferring transition probabilities from individual trajectory data. Synthetic
+mobility trajectories are then realized as memoryless, interchangeable movers evolving under
+these prescribed dynamics. By construction, the resulting trajectories are consistent with
+aggregate origin–destination (OD) flow constraints and do not encode individual identities,
+preferences, or activity schedules.
+This framework provides (i) a principled method for realizing trajectories from flow-based
+Markov descriptions, (ii) a network-centric mechanism for studying multi-step mobility struc-
+ture induced solely by connectivity and timing, and, most importantly, (iii) a conceptual
+foundation for inferring path-level mobility information from temporally aggregated, privacy-
+preserving OD data. In many applied settings, mobility data are released only after aggrega-
+tion by location and time slice, precluding direct observation of individual trajectories. The
+results presented here demonstrate that, under explicit and transparent structural assump-
+tions, such aggregated data are nevertheless compatible with a well-defined distribution over
+multi-step trajectories.
+Viewed abstractly, the proposed generator defines a flexible, multi-parameter family of
+probability distributions over trajectories, in which structural modules (e.g., hubs, corridors,
+directional bias schedules) may be included or omitted depending on what coarse information
+is available. While no parameter estimation or data fitting is undertaken in this paper, the
+construction provides a natural scaffold for future inference problems in which aggregate
+OD data constrain the admissible trajectory distributions. Crucially, this is not a multi-
+agent or behavioral model: trajectories are not interpreted as decisions made by persistent
+individuals, but as realizations of a prescribed, population-level stochastic dynamics in which
+individual identity carries no modeling meaning.
+A closely related motivation arises from the pseudo-Markov chain framework introduced
+in [7], where spatio-temporally aggregated OD data are used to define time-dependent tran-
+sition matrices acting on population distributions. That formulation deliberately abstracts
+away from realized paths, modeling mobility entirely at the level of collective flow evolution.
+The present work complements this perspective by providing a concrete mechanism for real-
+izing such prescribed, time-dependent Markov dynamics as synthetic trajectories—without
+introducing memory, individual heterogeneity, or behavioral assumptions. In this way, the
+generator developed here makes explicit the trajectory-level structure implicitly encoded in
+MOBILITY TRAJECTORIES FROM NETWORK-DRIVEN MARKOV DYNAMICS
+3
+aggregate flow descriptions, while remaining fully aligned with a flow-first, privacy-preserving
+modeling philosophy.
+At an aggregate level, the emphasis on externally driven flow dynamics parallels macro-
+scopic traffic models, where mobility is treated as the evolution of densities and fluxes on
+a network rather than as the outcome of individual decisions [8–10]. Unlike deterministic
+traffic-flow equations, however, our framework encodes these dynamics directly as a time-
+dependent Markov process and realizes them through stochastic, memoryless trajectories.
+The Markov dynamics specified in this framework are not intended to be arbitrary. Rather,
+the time-dependent transition kernels encode coarse, external pressures acting on mobility at
+the network level. Gravity terms, center–periphery asymmetries, hub and corridor structure,
+and scheduled bias multipliers can be interpreted as simplified representations of recurring
+incentives and constraints—such as work schedules, land-use organization, transportation
+capacity, or policy-driven accessibility—that shape collective movement without resolving
+individual intent. From this perspective, the dynamics resemble a form of self-organization
+driven by network topology and temporally varying activity attractors (gravitational cen-
+ters), in which mass redistributes coherently in response to shared conditions. Similar ideas
+appear implicitly in urban scaling and mobility studies that emphasize flow, coupling, and
+collective regularities over individual decision-making, as well as in broader work on stochas-
+tic transport on networks [11].
+Related but distinct are large-scale transport and activity-based simulators, such as Sim-
+Mobility developed at MIT [12], SUMO [13], and MATSim-like frameworks [14]. These sys-
+tems generate synthetic trajectories by assigning agents activity schedules, behavioral rules,
+and route choices on detailed transportation networks, often calibrated to survey or census
+data. While stochastic at various stages, they remain agent-centric: agents possess persistent
+identities, heterogeneous preferences, and planned sequences of activities, and trajectories
+are the primary objects of interest. Our model differs fundamentally from this paradigm. We
+do not simulate activities, demand, or decision-making, and we do not attribute meaning to
+individual paths. Instead, trajectories arise as realizations of a prescribed, time-dependent
+Markov dynamics defined entirely by network structure and externally specified biases.
+Privacy considerations fundamentally shape modern mobility research. While fine-grained
+spatial–temporal mobility data can enable trajectory reconstruction and re-identification
+[15, 16], many contemporary datasets therefore provide only aggregated origin–destination
+(OD) flows over fixed time intervals, discarding individual identifiers and temporal conti-
+nuity to mitigate these risks [15, 16]. Such aggregate representations are also standard in
+large-scale, population-based mobility models, where movement is treated as flux between
+subpopulations rather than individual trajectories [17–19].
+In this work, we operate ex-
+plicitly at this coarser level of abstraction, focusing on structural mobility patterns defined
+by network connectivity (e.g., corridors, hubs, and regional flows) rather than fine-grained
+traces; the aggregation scale assumed here deliberately excludes the spatial and temporal
+resolution required by known trajectory-recovery attacks [16]. At this level, we generate
+trajectories corresponding to Privacy-Enhanced Persons (PEPs)— indistinguishable, mem-
+oryless movers that are interchangeable at any location where they meet, and that represent
+the maximal trajectory information recoverable after such spatio-temporal aggregation, as
+formalized in [7].
+The remainder of this paper is organized as follows. Section 2 presents the trajectory
+generation model in detail. We first describe the spatial discretization and construction of
+4
+MOBILITY TRAJECTORIES FROM NETWORK-DRIVEN MARKOV DYNAMICS
+the undirected base graph, followed by the selection of reference centers and the construction
+of hubs, corridors, feeder paths, and metro links that define the overlay mobility network.
+We then introduce node potentials and directed edge attributes that support asymmetric,
+time-dependent dynamics on this network.
+Section 3 formulates the population evolution and trajectory realization procedure. We
+define a family of time-dependent, column-stochastic Markov matrices acting on population
+distributions, describe their construction from network geometry and modular bias compo-
+nents, and explain how synthetic, memoryless trajectories are realized for indistinguishable
+movers. This section also introduces post hoc attribution of physical travel distance and
+travel time to realized transitions, enabling time-elapsed mobility measures without altering
+the underlying Markov dynamics.
+Section 4 verifies the consistency of the trajectory realization with the prescribed network-
+driven dynamics. We compare multi-step transition matrices obtained by direct composition
+of the Markov kernels with those empirically estimated from realized trajectories, and quan-
+tify agreement using matrix- and column-level discrepancy measures.
+Finally, the appendix states the form of the Perron–Frobenius theorem relevant to the
+daily evolution matrix and justifies the existence and uniqueness of the periodic invariant
+population distribution used throughout the paper.
+Together, these sections establish a network-first methodology for realizing mobility trajec-
+tories from prescribed, time-dependent Markov dynamics and for validating their aggregate
+consistency without recourse to individual-level behavioral modeling.
+2. The Trajectory Generation Model
+This section describes the construction of the network-driven mobility generator. The
+model separates cleanly into two conceptual layers: a static, spatially embedded mobility
+network encoding admissible routes and hierarchical structure, and a time-dependent Markov
+dynamics defined on that network. The former specifies where movement is possible and how
+locations are organized (hubs, corridors, feeders), while the latter prescribes how population
+mass redistributes over time through externally imposed, schedule-driven transition kernels.
+Synthetic trajectories arise as memoryless realizations of this dynamics and are discussed in
+Section 3.
+2.1. Spatial discretization and base graph. We begin by defining a cell space that is inde-
+pendent of any mobility data or behavioral assumptions. A geographic region of interest
+is specified by a polygonal boundary obtained from open geographic sources, optionally ex-
+panded by a fixed buffer distance to reduce boundary artifacts.
+This region defines the
+admissible domain within which all subsequent network construction takes place.
+The region is discretized using the H3 hierarchical hexagonal grid [20] at a fixed resolution.
+Each H3 cell whose hexagonal polygon intersects the region boundary is retained as a node
+in the network, and is represented by the geographic centroid of the cell. This discretization
+yields a finite set of cells with uniform local geometry and bounded degree.
+An undirected base graph is then constructed by connecting each H3 cell to its immedi-
+ate neighbors in the H3 grid. Two cells are adjacent if they are at H3 grid distance one,
+corresponding to shared hexagonal boundaries. In all experiments reported here, we use H3
+resolution 6, for which the mean distance between centers of adjacent cells is approximately
+6.44 km. This base graph encodes only physical proximity and connectivity, and contains
+no directionality, hierarchy, or preference. At this stage, the network is homogeneous and
+MOBILITY TRAJECTORIES FROM NETWORK-DRIVEN MARKOV DYNAMICS
+5
+isotropic, serving as a topologically uniform substrate upon which additional structural fea-
+tures are imposed in later steps (Figure 1).
+Figure 1. H3 spatial discretization and undirected base graph for the study region
+(Atlanta shown for geographic scale only). Hexagonal tiles indicate H3
+cells at resolution 6, while nodes mark the corresponding cell centers.
+Adjacent cell centers are separated by approximately 6.44 km on average,
+and edges represent immediate H3 adjacency.
+Although the figures in this paper use the Atlanta metropolitan area for visual reference,
+the choice of region plays no role in the construction of the overlay network beyond setting
+geographic scale and distances; all network structure, hierarchy, and dynamics are generated
+independently of region-specific infrastructure or mobility data.
+2.2. Centers, hubs, and corridor structure. The purpose of this construction is not to model
+specific infrastructure, but to impose a controlled, hierarchical routing structure on an oth-
+erwise homogeneous spatial grid. Starting from the undirected base graph, we introduce
+hierarchical structure by designating a small subset of nodes as hubs and organizing con-
+nectivity around them. A reference center is first selected to anchor the construction; this
+may be specified explicitly (e.g., a known city center) or determined geometrically from the
+spatial distribution of nodes. Distances from this center are then used to stratify the re-
+gion into concentric radial bands, within which a prescribed number of hubs are selected
+from existing grid cells subject to minimum separation constraints. This procedure yields
+a sparse set of hubs distributed across space while respecting the underlying discretization
+and regional boundary.
+Hubs are connected to the reference center by constructing a corridor backbone on the
+base graph. For each hub, we compute a shortest path to the center on the unweighted H3
+adjacency graph using a standard shortest-path search, equivalent to Dijkstra’s algorithm
+with unit edge weights [21], and all edges along these paths are retained as backbone edges.
+This produces a tree-like structure rooted at the center, embedded within the base grid,
+along which long-range connectivity is concentrated. Paths may overlap and share segments
+6
+MOBILITY TRAJECTORIES FROM NETWORK-DRIVEN MARKOV DYNAMICS
+naturally, allowing corridors to merge as they approach the center without enforcing explicit
+hub-to-hub links.
+All non-hub nodes are connected to the hub backbone via feeder paths. For each node
+that is not designated as a hub, we identify the nearest hub in terms of graph distance on
+the base H3 adjacency. A shortest path from the node to that hub, computed using the
+same unweighted shortest-path procedure, is then added to the corridor structure, and the
+edges along this path are labeled as feeder edges. This ensures that every node in the region
+is connected to the backbone through at least one admissible route, producing a connected
+overlay network embedded within the base grid.
+Finally, a sparse set of metro edges is constructed between hubs to represent high-capacity,
+long-range connections. Each hub is linked to a geometrically closer hub that lies nearer to
+the center, forming a directed tree over the hubs based on radial distance. These metro
+edges bypass the local grid adjacency and provide express connectivity across the region.
+Together, the hub backbone, feeder paths, and metro edges define an overlay graph that
+captures hierarchical organization, long-range corridors, and local access, while remaining
+fully embedded in the underlying spatial discretization (Figure 2). All edges added to the
+overlay—whether backbone, feeder, or metro—are symmetrized after construction, so that
+each admissible route is traversable in both directions; this guarantees that the resulting
+directed mobility graph is strongly connected.
+Figure 2. Corridor overlay network constructed on top of the H3 base grid. Nodes
+correspond to H3 cells, with the reference center shown as a black node
+and hub locations shown as larger markers. Highlighted edges define a hi-
+erarchical routing structure: green edges indicate hub–backbone connec-
+tions linking each hub to the central anchor, while purple edges denote
+feeder paths connecting non-hub cells to hubs. Where uniquely defined,
+feeder direction is indicated by darker terminal segments. Metro links
+between hubs are drawn with increased line width.
+2.2.1. Node potentials and directional orientation. To support directionally biased dynamics
+in later stages of the model, we associate a scalar potential with each node that encodes its
+MOBILITY TRAJECTORIES FROM NETWORK-DRIVEN MARKOV DYNAMICS
+7
+position within the hub–center hierarchy. Specifically, each node i is assigned a potential
+Ψi = d(i, c),
+where d(i, c) denotes the shortest-path distance from node i to the reference center c on the
+base H3 adjacency graph. Nodes closer to the center therefore have lower potential values.
+For each directed edge (j →i) in the overlay network, we define a directional sign
+σij = sign(Ψj −Ψi) ∈{−1, 0, +1},
+where σij = +1 indicates movement toward lower potential (i.e., inward toward the center),
+σij = −1 indicates movement toward higher potential (outward from the center), and σij = 0
+corresponds to neutral edges with no net potential change. This sign is fixed by the network
+geometry and hierarchy, and does not depend on time.
+The directional sign σij is used in the construction of the time-dependent transition ma-
+trices to apply scheduled directional bias factors, enabling asymmetric flow along corridors
+and feeders while preserving a Markovian dynamics.
+3. Population Evolution and Trajectory Realization
+In this section we specify the time-dependent Markov dynamics that govern population
+evolution on the network constructed in Section 2, and describe how synthetic trajectories
+are realized from these dynamics. The key modeling choice is to prescribe a family of column-
+stochastic transition matrices directly from network geometry, distance decay, and externally
+imposed temporal biases, rather than estimating them from trajectory data. Population
+evolution is treated deterministically at the distribution level, while trajectories arise as
+independent, memoryless realizations of the same dynamics.
+We adopt a matrix-based formulation in which transitions are given by a time-indexed
+family of Markov matrices acting on population distributions over spatial locations.
+In
+this section we describe how this formalism is instantiated on the network constructed in
+Section 2.1, and how synthetic trajectories are realized from the resulting dynamics.
+3.1. Time-dependent Markov matrices. Let V = {1, . . . , N} denote the set of spatial loca-
+tions (H3 cells). For each discrete time-step t, we define a column-stochastic matrix
+Mt ∈RN×N,
+N
+X
+i=1
+(Mt)ij = 1
+∀j ∈V,
+where (Mt)ij gives the probability of transitioning from location j to location i during time-
+step t.
+The matrix Mt is not inferred from trajectory data. Instead, it is specified exogenously as
+a function of:
+• the underlying spatial adjacency graph,
+• the corridor and hub overlay described in Section 2.2,
+• geometric distance between locations,
+• and time-dependent weighting modules encoding center–periphery asymmetries, di-
+rectional biases, and corridor preferences.
+Self-loops (i = j) are explicitly included and represent persistence at the same location
+during the current time-step.
+8
+MOBILITY TRAJECTORIES FROM NETWORK-DRIVEN MARKOV DYNAMICS
+A deliberate feature of this construction is that transition probabilities are normalized
+independently for each origin, so that any origin-specific mass factors cancel identically;
+only relative destination attractiveness and network structure influence movement decisions.
+3.2. Population evolution. Let pt ∈RN denote the population mass over locations at time-
+step t, with
+pt ≥0,
+N
+X
+i=1
+(pt)i = 1.
+Following Section 4 of [7], the population evolves deterministically according to
+pt+1 = Mt pt.
+An initial distribution p0 is specified externally. In the implementation, p0 may be chosen
+uniformly or as a fixed point of the composed daily matrix, but the construction does not
+depend on this choice. This evolution equation defines a time-inhomogeneous Markov process
+on the space of population distributions. No individual-level information is introduced at
+this stage.
+3.2.1. Gravity-type interaction kernel. Transitions between locations are constructed from a
+gravity-type interaction kernel. In its classical form, a gravity model assigns an unnormalized
+flow intensity
+Fij = k mi mj
+dβ
+ij
+,
+where mi and mj are destination and origin masses, dij is the distance between locations,
+β > 0 is a distance-decay exponent, and k is a normalization constant [1,6,22].
+In the present framework, we adopt this structure as a time-dependent interaction kernel
+rather than as a standalone flow model. The masses and normalization are allowed to vary
+with time, and the kernel is embedded within a Markov transition matrix defined on a
+constrained mobility network.
+Specifically, each location i is assigned a time-dependent mass mi(t) encoding coarse spa-
+tial asymmetries such as center–periphery structure, hub status, and externally imposed
+temporal schedules. Origin mass factors mj(t) are included at the kernel level but cancel un-
+der Markov normalization, as described below. Distances dij are computed from the spatial
+embedding of the H3 cells and remain time-independent.
+3.2.2. Structural edge weights. The factor ωij is a static, nonnegative weight encoding the
+structural connectivity of the overlay network. It reflects whether the edge (j, i) lies on:
+• a hub backbone corridor,
+• a feeder path,
+• or a long-range metro connection between hubs.
+Edges absent from the overlay have ωij = 0 and are therefore not admissible transitions.
+3.2.3. Time-dependent bias factors. The factor ϕij(t) aggregates all remaining time-dependent
+modifiers that act on admissible edges. These include:
+• feeder-specific scaling factors that distinguish primary and secondary attachments,
+• hub-related scaling applied to outgoing metro edges,
+• and directional biases that favor motion toward or away from designated reference
+centers.
+MOBILITY TRAJECTORIES FROM NETWORK-DRIVEN MARKOV DYNAMICS
+9
+Each component may follow its own externally specified schedule, evaluated as a function
+of the current time-step t. These schedules are independent across modules and are applied
+multiplicatively.
+3.3. Construction of the transition matrices. We now give the explicit construction of the
+matrices Mt introduced above. The mobility dynamics are specified by a family of time-
+dependent, column-stochastic Markov matrices {Mt}t∈T acting on population vectors. For
+each origin node j, the diagonal entry (Mt)jj represents the probability of remaining at j
+during time-step t.
+(Mt)jj = sj(t),
+where sj(t) ∈[0, 1] is a time-dependent stay probability.
+For i ̸= j, transitions are defined by normalized edge weights. Let
+wij(t) = k(t) mi(t)α mj(t)α
+dβ
+ij
+ωij ϕij(t),
+i ̸= j.
+Here mi(t) and mj(t) denote time-dependent destination and origin mass factors, dij is
+the geographic distance between locations j and i, α is a mass-scaling parameter, β >
+0 is a distance-decay exponent, ωij encodes static structural connectivity of the overlay
+network, and ϕij(t) aggregates all remaining time-dependent directional and structural bias
+factors. The scalar k(t) is a time-dependent normalization constant introduced to ensure
+compatibility with the Markov normalization described below.
+Although the interaction kernel includes both origin and mass factors, the origin mass
+mj(t) does not influence the resulting transition probabilities. As shown below, Markov
+normalization is performed independently for each origin j, and the factor mj(t) cancels
+identically from all outgoing transitions from j. As a result, the effective transition structure
+depends only on relative destination attractiveness, distance decay, network connectivity, and
+time-dependent biases, and not on the absolute mass assigned to the origin.
+3.3.1. Center–periphery structure and flow objectives. The purpose of the modular weighting
+scheme is to generate structured, time-dependent flows between a central urban core and a
+surrounding periphery. To this end, we designate a small set of spatial cells near a geographic
+or network-defined reference point as the center.
+All remaining locations are treated as
+peripheral in this deliberately simplified representation of urban structure.
+Each node is assigned a scalar potential measuring its graph distance to the center, which
+induces a consistent notion of inward and outward movement along the overlay network. The
+transition weights are then constructed so that, during selected periods of the day, movement
+toward the center is preferentially amplified, while during other periods, movement toward
+the periphery is favored.
+The resulting dynamics are not inferred from data. Instead, weights, biases, and schedules
+are chosen explicitly to produce canonical diurnal patterns—such as morning inflow and
+evening outflow—at the level of aggregate network structure.
+The transition matrices are assembled from a collection of modular components, not all
+of which are required in every configuration; together, they provide a flexible vocabulary for
+encoding structural and temporal asymmetries in the flow dynamics.
+• Module A (stay probability schedules). Specifies the time-dependent stay prob-
+ability sj(t) at each location j.
+10
+MOBILITY TRAJECTORIES FROM NETWORK-DRIVEN MARKOV DYNAMICS
+• Module B (node mass schedules). Defines time-dependent masses mi(t) for each
+node.
+• Module C (hub stay adjustment). Applies additional time-dependent scaling to
+the stay probabilities of hub nodes.
+• Module D (hub mass modulation). Applies multiplicative factors to the mass
+schedules of hub nodes.
+• Module E (feeder and corridor scaling). Assigns static structural weights dis-
+tinguishing feeder paths, corridor backbones, and local connections.
+• Module F (metro link schedules). Applies time-dependent scaling to long-range
+metro edges between hubs.
+• Module G (directional bias schedules). Applies time-dependent directional bias
+factors to edges based on their orientation relative to the reference center.
+As a representative example, we detail the construction of Module G (directional bias);
+other modules follow the same scheduling pattern.
+3.3.2. Module G: Directional bias schedules. Module G introduces time-dependent direc-
+tional asymmetries in movement along network edges. Each directed edge (j →i) carries a
+fixed directional sign σij ∈{−1, 0, +1}, defined by the network construction in Section 2.2
+and encoding whether the edge is oriented outward from the reference center (−1), inward
+toward the center (+1), or neutral (0). Module G does not alter this geometric orientation;
+instead, it applies time-dependent bias factors to edges based on their preassigned directional
+sign, thereby inducing asymmetric flow patterns that vary over the daily cycle.
+The directional bias factor ϕij(t) appearing above is defined as
+ϕij(t) = bσij(t),
+where b+1(t), b−1(t), and b0(t) are scalar, time-dependent multipliers associated with inward,
+outward, and neutral directions, respectively.
+Each multiplier is specified by a schedule over the day. A schedule consists of a sequence
+of time-steps
+(τs, τe, v),
+meaning that the multiplier ramps linearly from its current value at time τs to the value v at
+time τe, and is held constant until the next scheduled ramp. Outside all specified intervals,
+the multiplier remains at its most recently attained value.
+3.3.3. Example. Consider an inward directional bias b+1(t) with the schedule
+(06:00, 11:00, 5.0),
+(15:00, 20:00, 1.0).
+Starting from a baseline value of 1.0, the inward bias increases linearly between 06:00 and
+11:00, reaching 5.0 at 11:00, and is held at that level until 15:00. Between 15:00 and 20:00 it
+ramps back down to 1.0, where it remains for the rest of the day. During the morning peak,
+inward-directed edges are therefore strongly favored, while in the evening the directional
+preference is neutralized.
+This mechanism allows the transition matrices Mt to encode recurring collective patterns
+such as morning inflow toward central areas and evening outflow, without introducing agent
+memory or individual intent. Directional bias schedules act multiplicatively on edge weights
+and are fully compatible with the Markov structure of the dynamics.
+MOBILITY TRAJECTORIES FROM NETWORK-DRIVEN MARKOV DYNAMICS
+11
+3.3.4. Normalization. For each origin j, the off-diagonal weights {wij(t)}i̸=j are normalized
+so that their sum equals 1 −sj(t):
+(Mt)ij = (1 −sj(t))
+wij(t)
+P
+i′̸=j wi′j(t),
+i ̸= j.
+Because the origin mass mj(t) appears multiplicatively in every wij(t) for fixed j, it can-
+cels under normalization. As a result, the transition probabilities depend on destination
+masses, distance, network structure, and time-dependent biases, but not on the absolute
+mass assigned to the origin.
+3.4. Trajectory realization. Synthetic trajectories are realized by interpreting the population
+dynamics above as a flow matrix, instantiating memoryless movers that are interchangeable
+when they share the same location at a time-step. Each mover occupies a location j at
+time-step t and performs a single categorical (single-outcome) draw from the distribution
+defined by column (Mt)·j, i.e., hops according to the column transition probabilities to one
+of the destinations. The resulting destination determines the carrier’s location at time-step
+t + 1. This procedure is repeated independently for all movers and all time-steps. Aggregate
+OD counts emerge as empirical sums of these categorical transitions.
+3.5. Choice of the initial population distribution. Because the Markov dynamics are time-
+inhomogeneous, the notion of a stationary distribution is replaced by a periodic invariant
+distribution over one full daily cycle. The evolution of population mass in the model is
+governed by the time-dependent Markov matrices {Mt}T
+t=1, where one full day corresponds
+to a fixed period of T discrete time steps. Over one period, these matrices define a daily
+evolution matrix
+pT = Q p0,
+Q := MTMT−1 · · · M1,
+where pt denotes the population distribution over nodes at time t.
+By construction, each Mt is column-stochastic, and hence so is the daily matrix Q. More-
+over, the overlay mobility network is connected, with hubs, corridors, feeders, and metro
+edges ensuring that every node can reach every other node within a single daily cycle. As a
+consequence, the matrix Q is irreducible.
+Under these conditions, the Perron–Frobenius theorem for nonnegative matrices guaran-
+tees the existence of a unique invariant population distribution p∗satisfying
+Q p∗= p∗,
+up to normalization (see Appendix A).
+In this work, we choose the initial population distribution p0 to be this periodic fixed
+point p∗.
+This choice eliminates transient effects associated with arbitrary initialization
+and ensures that the realized trajectories reflect the intrinsic structure of the prescribed
+time-dependent transition matrices rather than relaxation toward equilibrium.
+12
+MOBILITY TRAJECTORIES FROM NETWORK-DRIVEN MARKOV DYNAMICS
+Figure 3. Periodic fixed point population distribution p∗of the daily Markov ma-
+trix Q = MT · · · M1. Node color intensity represents the invariant pop-
+ulation mass associated with each H3 cell, with darker colors indicating
+higher population as shown in the colorbar. This distribution is uniquely
+determined (up to normalization) by the OD transition probabilities en-
+coded in the matrices {Mt}, and reflects the intrinsic spatial organization
+implied by the network-driven dynamics rather than any imposed initial
+condition. The Atlanta region is shown for geographic scale only.
+Figure 3 illustrates that the invariant population distribution exhibits strong spatial struc-
+ture induced entirely by network connectivity, distance effects, and scheduled directional
+biases, despite the absence of any individual-level behavioral assumptions.
+3.5.1. Remark (Significance of the periodic fixed point). The existence of the periodic fixed
+point p∗has a strong and useful interpretation. It implies that the long-run distribution
+of population over locations is fully determined up to normalization by the collection of
+OD transition probabilities encoded in the matrices {Mt}. In particular, knowledge of how
+mass is redistributed from each origin to all possible destinations within each time-step
+is sufficient to recover a stable, day-periodic population distribution, without reference to
+individual trajectories, activity patterns, or behavioral heterogeneity.
+This highlights the extent to which aggregate flow structure alone constrains macroscopic
+mobility outcomes. The fixed point p∗represents the unique population configuration that
+is self-consistent with the prescribed network-driven transition dynamics, and may therefore
+be interpreted as the intrinsic spatial organization implied by the observed (or specified) OD
+flows.
+3.6. Travel distance attribution. The Markov transition matrices specify only the probability
+of movement between spatial cells and do not encode physical travel distances. To attach a
+geometric length scale to realized trajectories, we assign a travel distance to each realized
+transition after destination selection.
+Let j →i denote a realized transition between two H3 cells at a fixed resolution. For
+each ordered pair (j, i), we precompute a distance envelope [d−
+ji, d+
+ji] based solely on the H3
+MOBILITY TRAJECTORIES FROM NETWORK-DRIVEN MARKOV DYNAMICS
+13
+geometry and the geographic locations of the cell centroids. Let dji denote the great-circle
+distance between the centroids of cells j and i, and let Dhex denote the diameter of an H3
+hexagon at the chosen resolution.
+For transitions between distinct cells (j ̸= i), the envelope is defined as
+d−
+ji = max{0, dji −Dhex},
+d+
+ji = dji + Dhex.
+This interval captures the range of plausible travel distances between points lying anywhere
+within the two hexagonal cells.
+For self-transitions (j = i), representing local movement within a single H3 cell, the
+envelope is defined as
+d−
+jj = 0,
+d+
+jj = Dhex.
+Conditional on a realized transition j →i, the travel distance is then sampled indepen-
+dently from a uniform distribution on [d−
+ji, d+
+ji]. This sampling is performed independently
+for each trajectory and each time step.
+Distance attribution is strictly post hoc: it does not influence the transition probabilities,
+the construction of the Markov matrices, or the evolution of population mass.
+Its sole
+purpose is to attach physically meaningful length scales to realized trajectories, enabling
+downstream analysis of time-elapsed flows, total distance traveled, and other distance-based
+mobility measures while preserving a clear separation between probabilistic routing and
+geometric interpretation.
+3.7. Travel time attribution. For each realized transition j →i, a travel time is assigned
+independently based on the realized travel distance and a randomly sampled travel speed.
+Each PEP is assumed to move at a constant speed over the duration of a single hop, with
+the speed drawn independently from a fixed distribution representing plausible urban travel
+conditions (e.g., a truncated distribution over plausible urban commuting speeds).
+The
+travel time is then computed as the ratio of the realized distance to the sampled speed
+and is constrained to lie within the duration of the corresponding time-step. If the raw
+distance–speed ratio exceeds the time-bin duration, the travel time is truncated at the time-
+step length.
+As with distance attribution, travel time assignment does not influence transition proba-
+bilities or destination choice. The stochastic mobility dynamics are governed entirely by the
+time-dependent Markov matrices, while travel times serve only to attach physically inter-
+pretable temporal metadata to each realized hop. At the aggregate level, origin–destination
+travel times are reported by averaging over realized PEP hops within each origin–destination–
+time-step, yielding consistent OD-level travel-time summaries without altering the underly-
+ing flow structure.
+3.8. Generated data. The trajectory generator produces both raw synthetic trajectories and
+aggregated origin–destination (OD) data products directly from the same underlying Markov
+dynamics. These outputs are generated simultaneously during trajectory realization and are
+therefore internally consistent by construction.
+3.8.1. Trajectory-level outputs. At the finest resolution, the generator produces raw PEP
+trajectories. Each trajectory consists of a sequence of spatial locations indexed by discrete
+time-steps, together with post hoc attributes attached to each realized hop. Each PEP is
+assigned a persistent identifier that is used solely to link successive transitions over time.
+For every transition j →i, the output records:
+14
+MOBILITY TRAJECTORIES FROM NETWORK-DRIVEN MARKOV DYNAMICS
+• the persistent PEP identifier,
+• the origin and destination node identifiers,
+• the time-step index,
+• the realized travel distance,
+• and the realized travel time.
+These trajectories represent memoryless realizations of the prescribed time-dependent
+Markov dynamics.
+The persistent identifiers function solely as bookkeeping labels: con-
+ditional on a location and time-step, realized hops are exchangeable across PEPs, and the
+identifiers carry no individual-level state, memory, or behavioral meaning.
+3.8.2. Aggregated OD outputs. In parallel with trajectory generation, the code produces
+aggregated origin–destination summaries over user-specified temporal windows. For each
+OD pair (j, i) and time-step, the following quantities are computed directly from realized
+PEP hops:
+• total trip count,
+• mean travel distance,
+• median travel distance,
+• standard deviation of travel distance,
+• mean travel time,
+• median travel time,
+• and standard deviation of travel time.
+These summaries are obtained by simple aggregation of realized transitions and do not
+involve any additional modeling assumptions. Because both trajectory-level and OD-level
+data are derived from the same realizations, the aggregated outputs are guaranteed to be
+consistent with the underlying Markov matrices up to finite-population sampling effects.
+Although all examples in this paper use the H3 hexagonal grid, the construction does
+not depend on any specific spatial discretization. The same procedure applies to alternative
+tessellations such as Geohash or square grids, provided that: (i) adjacency relationships
+are defined, (ii) cell centroids are available for distance calculation, and (iii) a bounded
+cell diameter can be specified for distance and time attribution. The choice of discretization
+affects geometric resolution but does not alter the Markov formulation, trajectory realization,
+or verification framework.
+To illustrate the structure of the generated OD data at a fixed time, Figures 4 and 5
+show the realized OD flows for a single representative time-step (09:00–09:30). Both figures
+correspond to the same transition matrix Mt, with the system initialized at the periodic
+fixed point p∗at 00:00 and evolved forward to the 09:00–09:30 time-step from which the OD
+flows are collected. They differ only in that flows are restricted to edges oriented inward
+toward the reference center (Figure 4) or outward away from it (Figure 5). Together, they
+provide a directional decomposition of the OD traffic generated in a single time step. In all
+maps, color intensity increases monotonically with population or flow magnitude.
+MOBILITY TRAJECTORIES FROM NETWORK-DRIVEN MARKOV DYNAMICS
+15
+Figure 4. Single time-step OD flows during the 09:00–09:30 time-interval, re-
+stricted to edges oriented inward toward the reference center. Edge color
+intensity represents the magnitude of flow along each directed edge, with
+darker colors indicating higher flow as shown in the colorbar. Flows re-
+flect the directional structure encoded in the transition matrix Mt for
+this time step.
+Figure 5. Single time-step OD flows during the same 09:00–09:30 time-interval as
+Figure 4, restricted to edges oriented outward from the reference center.
+Edge color intensity represents the magnitude of flow along each directed
+edge, with darker colors indicating higher flow as shown in the colorbar.
+To further summarize the directional balance of movement at this time, Figure 6 shows
+the corresponding net flow for the same 09:00–09:30 time-step. Net flow on each edge is
+defined as the difference between inward- and outward-oriented OD traffic along that edge.
+16
+MOBILITY TRAJECTORIES FROM NETWORK-DRIVEN MARKOV DYNAMICS
+Positive net flow therefore indicates dominant movement toward the reference center, while
+negative values indicate dominant outward movement.
+Figure 6. Net OD flows during the 09:00–09:30 time-interval. Edge color indicates
+the signed net flow magnitude, defined as inward flow minus outward
+flow along each edge. Higher net movements correspond to darker col-
+ors. The predominance of inward net flows, particularly on edges close
+to the center, is consistent with expected morning commuter dynamics
+and confirms that the configured directional biases produce the intended
+aggregate behavior.
+3.9. Privacy interpretation. Because the transition matrices Mt are specified independently
+of any observed individual trajectories, and because realized paths are generated from in-
+terchangeable, memoryless movers (exchangeable conditional on their current location), the
+resulting data contain no linkable personal information. The generator corresponds to the
+limit in which all individual identity has been removed and only network-constrained flow
+information is retained.
+4. Internal consistency between prescribed dynamics and trajectory
+realizations
+The purpose of this section is to verify internal consistency between the prescribed time-
+dependent Markov dynamics and the realized PEP trajectories. Synthetic trajectories are
+generated as memoryless realizations of the single time-step transition matrices {Mt} de-
+scribed in Sections 2 and 3. From these trajectories we independently estimate an empirical
+end-to-end transition matrix over a fixed time interval. A necessary consistency requirement
+is that this empirical multi-step transition matrix agrees, up to finite-sample effects, with the
+multi-step transition matrix obtained by composing the prescribed single time-step matrices
+{Mt} over the same interval. The analysis below is therefore a consistency check between
+OD-level and trajectory-level representations of the same underlying mobility dynamics, not
+an empirical validation against external data.
+MOBILITY TRAJECTORIES FROM NETWORK-DRIVEN MARKOV DYNAMICS
+17
+We verify this consistency by comparing two end-to-end transition matrices over a fixed
+temporal window: one obtained by composing the prescribed single time-step transition
+matrices {Mt}, and one empirically estimated from realized PEP trajectories over the same
+interval.
+4.1. Multi-step transition matrices. Consider a verification interval consisting of m consecu-
+tive time-steps t0, t1, . . . , tm. The corresponding multi-step transition matrix implied by the
+model is
+Aprod = MtmMtm−1 · · · Mt1
+which maps an initial population distribution xt0 at the start of the interval to the distribu-
+tion at its end.
+Independently, we construct an empirical end-to-end matrix from realized PEP trajecto-
+ries. Let Fij denote the number of PEPs whose first observed location in the interval is node
+j and whose last observed location is node i. Let
+xt0(j) =
+X
+i
+Fij
+denote the number of trajectories originating at node j. The empirical transition matrix is
+then defined column-wise as1
+Apep
+ij
+=
+
+
+
+Fij
+xt0(j),
+xt0(j) > 0,
+δij,
+xt0(j) = 0,
+By construction, Apep is column-stochastic on the same node set as Aprod, ensuring that
+discrepancies reflect estimation noise rather than normalization artifacts.
+4.2. Comparison metrics. To quantify agreement between the two matrices, we evaluate
+matrix-level and column-level discrepancies. Let
+D = Apep −Aprod.
+We report a small set of standard, unweighted and population-weighted discrepancy measures
+to summarize agreement at both the global matrix level and the origin-column level.
+• the ℓ1 matrix norm ∥D∥1 = P
+i,j |Dij|,
+• the root-mean-square error
+q
+1
+N2
+P
+i,j D2
+ij,
+• the mean column-wise ℓ1 deviation,
+• and the mean column-wise Jensen–Shannon divergence.
+Because some origin locations contribute substantially more trajectories than others, we
+also compute population-weighted versions of these metrics. Using the normalized origin
+mass
+wj =
+xt0(j)
+P
+k xt0(k),
+1In the verification experiments reported here, the number of realized PEP trajectories K is sufficiently
+large that every origin node has xt0(j) > 0 over the verification window, and this fallback case is therefore
+never activated in practice. The identity-column convention is included for formal completeness and robust-
+ness in finite-sample or sparse regimes, where some origin nodes may contribute zero observed trajectories
+at the start of the interval.
+18
+MOBILITY TRAJECTORIES FROM NETWORK-DRIVEN MARKOV DYNAMICS
+we define weighted column-wise deviations by averaging with respect to wj. Weighted ℓ1,
+RMSE, and Jensen–Shannon scores therefore emphasize agreement in high-flow regions of
+the network while downweighting statistically sparse origins.
+Formal definitions of all discrepancy metrics used in this section are provided in Appen-
+dix B.
+4.3. Verification results. We now report a quantitative verification of the network-driven
+trajectory generator.
+4.3.1. Verification setup. The experiment uses the corridor overlay network on the H3 grid
+at resolution 6, with single-feeder mode, potential-based edge directionality, and the periodic
+fixed-point initialization p0 = p∗. We consider a representative verification window consist-
+ing of six consecutive 30-minute time-steps (06:00–09:00) on 2025–06–01. All runs use the
+same network (99 nodes) and differ only in the number of realized PEP trajectories K.
+Parameter
+Value
+Region
+Atlanta, Georgia
+Graph mode
+Corridors
+H3 resolution
+6
+time-step size
+30 minutes
+Verification span start
+2025–06–01 06:00
+Verification span end
+2025–06–01 09:00
+Number of time-steps
+6
+Number of nodes
+99
+Table 1. Common configuration parameters for the flow verification experiments.
+Only the number of realized PEP trajectories K varies across runs.
+4.3.2. Quantitative results. Table 2 reports agreement between the empirical end-to-end
+transition matrix Apep estimated from realized PEP trajectories and the matrix Aprod ob-
+tained by composing the prescribed single time-step Markov matrices {Mt} over the same
+verification window.
+Unweighted metrics characterize global matrix-level discrepancies, while population-weighted
+metrics emphasize agreement for origins contributing the largest flow volumes. Because PEP
+trajectories are generated by independent categorical draws from the columns of Mt, dis-
+crepancies between Apep and Aprod arise solely from finite-sample noise.
+MOBILITY TRAJECTORIES FROM NETWORK-DRIVEN MARKOV DYNAMICS
+19
+Metric
+Run 1 (K = 120,000)
+Run 2 (K = 480,000)
+ℓ1 matrix norm
+12.4853
+6.4588
+RMSE
+3.7399 × 10−3
+1.9336 × 10−3
+Mean column ℓ1 deviation
+0.12611
+0.06524
+Mean column Jensen–Shannon divergence
+8.7402 × 10−3
+2.5204 × 10−3
+Weighted ℓ1 deviation
+0.09497
+0.04697
+Weighted RMSE
+2.7420 × 10−3
+1.3656 × 10−3
+Weighted Jensen–Shannon divergence
+5.1578 × 10−3
+1.4572 × 10−3
+Table 2. Agreement between the empirical end-to-end transition matrix Apep esti-
+mated from realized PEP trajectories and the multi-step transition matrix
+Aprod obtained by composing the prescribed single time-step Markov ma-
+trices {Mt}, for two different numbers of realized PEP trajectories K. All
+discrepancies arise solely from finite-population sampling noise.
+Across all metrics, discrepancies decrease as the number of realized PEP trajectories K
+increases, consistent with finite-sample estimation of transition probabilities. This behavior
+is expected for independent categorical sampling from the Markov matrices, for which esti-
+mation error scales on the order of K−1/2. The observed scaling is consistent with standard
+Monte Carlo estimation of categorical transition probabilities and confirms that discrepancies
+arise solely from finite-population sampling.
+4.3.3. Code availability. All network construction, trajectory generation, and verification
+procedures described in this paper are implemented in a codebase available at https://
+github.com/asif-shakeel/Mobility-Trajectories.git. The repository includes scripts
+to reproduce all figures and verification metrics reported here.
+5. Summary and outlook
+Taken together, these results demonstrate that network-driven, time-dependent Markov
+dynamics can be realized faithfully as synthetic trajectories of interchangeable movers with-
+out invoking agent memory or behavioral assumptions. The framework provides a principled
+bridge between aggregated OD flow descriptions and trajectory-level realizations, enabling
+the study of time-elapsed mobility measures using only network structure and externally
+specified schedules. Because all outputs are generated directly from network-driven matri-
+ces, the model is particularly well suited to privacy-preserving settings where individual-level
+data are unavailable.
+The modular structure of the framework admits extension to settings in which OD data
+are available for a specific city or region. Parameters governing network structure, temporal
+bias schedules, and distance decay may be adjusted or augmented to reflect observed aggre-
+gate flows, while preserving the separation between collective dynamics and individual-level
+behavior. Exploring such data-informed extensions is a natural direction for future work.
+References
+[1] D. Brockmann, L. Hufnagel, and T. Geisel, The scaling laws of human travel, Nature 439 (2006),
+no. 7075, 462–465. doi:10.1038/nature04292.
+[2] M. C. Gonz´alez, C. A. Hidalgo, and A.-L. Barab´asi, Understanding individual human mobility patterns,
+Nature 453 (2008), 779–782. doi:10.1038/nature06958.
+20
+MOBILITY TRAJECTORIES FROM NETWORK-DRIVEN MARKOV DYNAMICS
+[3] C. Song, T. Koren, P. Wang, and A.-L. Barab´asi, Modelling the scaling properties of human mobility,
+Nature Physics 6 (2010), 818–823. doi:10.1038/nphys1760.
+[4] C. Song, Z. Qu, N. Blumm, and A.-L. Barab´asi, Limits of predictability in human mobility, Science 327
+(2010), no. 5968, 1018–1021. doi:10.1126/science.1177170.
+[5] H. Barbosa, M. Barthelemy, G. Ghoshal, C. R. James, M. Lenormand, T. Louail, R. Menezes, J. J.
+Ramasco, F. Simini, and M. Tomasini, Human mobility: Models and applications, Physics Reports 734
+(2018), 1–74. doi:10.1016/j.physrep.2018.01.001.
+[6] F. Simini, M. C. Gonz´alez, A. Maritan, and A.-L. Barab´asi, A universal model for mobility and migration
+patterns, Nature 484 (2012), 96–100. doi:10.1038/nature10856.
+[7] A. Foster, D. A. Meyer, and A. Shakeel, A Pseudo Markov-Chain Model and Time-Elapsed Measures of
+Mobility from Collective Data, 2025. arXiv:2502.04162.
+[8] M. J. Lighthill and G. B. Whitham, On kinematic waves. II. A theory of traffic flow on long
+crowded roads, Proceedings of the Royal Society of London. Series A 229 (1955), no. 1178, 317–345.
+doi:10.1098/rspa.1955.0089.
+[9] P. I. Richards, Shock waves on the highway, Operations Research 4 (1956), no. 1, 42–51.
+doi:10.1287/opre.4.1.42.
+[10] C. F. Daganzo, The cell transmission model, part II: Network traffic, Transportation Research Part B:
+Methodological 29 (1995), no. 2, 79–93. doi:10.1016/0191-2615(94)00022-R.
+[11] L. M. A. Bettencourt, The origins of scaling in cities, Science 340 (2013), no. 6139, 1438–1441.
+doi:10.1126/science.1235823.
+[12] M. Adnan, F. C. Pereira, C. M. L. Azevedo, K. Basak, M. Lovric, S. Raveau, Y. Zhu, J. Ferreira, and
+M. Ben-Akiva, SimMobility: A multi-scale integrated agent-based simulation platform, Transportation
+Research Board 95th Annual Meeting Compendium of Papers, 2016. TRB Paper No. 16-2691 (no DOI).
+[13] D. Krajzewicz, J. Erdmann, M. Behrisch, and L. Bieker, Recent development and applications of SUMO
+– simulation of urban mobility, International Journal on Advances in Systems and Measurements 5
+(2012), no. 3–4, 128–138.
+[14] A. Horni, K. Nagel, and K. W. Axhausen, The Multi-Agent Transport Simulation MATSim, Ubiquity
+Press, 2016. doi:10.5334/baw.
+[15] Y.-A. de Montjoye, S. Gambs, V. D. Blondel, G. Canright, N. de Cordes, S. Deletaille, K. Engø-Monsen,
+M. Garcia-Herranz, J. Kendall, C. Kerry, G. Krings, E. Letouz´e, M. Luengo-Oroz, N. Oliver, L. Rocher,
+A. Rutherford, Z. Smoreda, J. Steele, E. Wetter, A. Pentland, and L. Bengtsson, On the privacy-
+conscientious use of mobile phone data, Scientific Data 5 (2018). doi:10.1038/sdata.2018.286.
+[16] F. Xu, Z. Tu, Y. Li, P. Zhang, X. Fu, and D. Jin, Trajectory Recovery From Ash: User Privacy Is
+NOT Preserved in Aggregated Mobility Data, Proceedings of the 26th International World Wide Web
+Conference, 2017, pp. 1241–1250. doi:10.1145/3038912.3052620.
+[17] M. Tizzoni, P. Bajardi, C. Poletto, J. J. Ramasco, D. Balcan, B. Gon¸calves, N. Perra, and V. Col-
+izza, Real-time numerical forecast of global epidemic spreading: Case study of 2009 A/H1N1pdm, BMC
+Medicine 10 (2012), 165. doi:10.1186/1741-7015-10-165.
+[18] Cuebiq, Cuebiq Mobility Data: Privacy-First Aggregated Origin–Destination Flows, 2020. cuebiq.com.
+[19] SafeGraph, SafeGraph Patterns and Origin–Destination Data, 2021. safegraph.com.
+[20] Uber
+Technologies,
+Inc.,
+H3:
+A
+Hexagonal
+Hierarchical
+Geospatial
+Indexing
+System,
+2018.
+https://h3geo.org/.
+[21] E. W. Dijkstra, A note on two problems in connexion with graphs, Numerische Mathematik 1 (1959),
+no. 1, 269–271. doi:10.1007/BF01386390.
+[22] Oh-Hyun Kwon, Inho Hong, Woo-Sung Jung, and Hang-Hyun Jo, Multiple gravity laws for human
+mobility within cities, EPJ Data Science 12 (2023), 57. doi:10.1140/epjds/s13688-023-00438-x.
+Appendix A. Perron–Frobenius theorem for the daily matrix
+We briefly state the form of the Perron–Frobenius theorem relevant to the daily evolution
+matrix used in this work.
+MOBILITY TRAJECTORIES FROM NETWORK-DRIVEN MARKOV DYNAMICS
+21
+Let Q ∈RN×N be a nonnegative, column-stochastic matrix, i.e., Qij ≥0 for all i, j and
+P
+i Qij = 1 for all j. Assume further that Q is irreducible, meaning that for any pair of
+indices i, j, there exists an integer k ≥1 such that (Qk)ij > 0.
+Then the following statements hold:
+• The spectral radius of Q is equal to 1.
+• There exists a unique (up to scalar normalization) strictly positive vector p∗∈RN
+such that
+Q p∗= p∗.
+• The vector p∗can be normalized to represent a probability distribution, i.e., p∗
+i > 0
+and P
+i p∗
+i = 1.
+In the present setting, the matrix Q = MT · · · M1 represents one full daily cycle of the
+time-dependent Markov dynamics.
+Irreducibility follows from the strong connectivity of
+the overlay mobility network together with the assignment of strictly positive transition
+probability to every overlay edge at every time step: for any pair of nodes, there exists a
+directed path in the overlay graph, and each edge along this path is realized with positive
+probability at each step of the daily cycle. Consequently, every node can reach every other
+node with positive probability over one full cycle.
+Moreover, because each single time-step matrix Mt assigns strictly positive probability to
+self-transitions, the daily matrix Q has a positive diagonal and is therefore primitive. As a
+consequence, the invariant distribution p∗is unique and globally attracting.
+The resulting invariant distribution p∗is thus a periodic fixed point of the daily matrix
+and provides a natural, non-transient choice for the initial population distribution p0.
+Appendix B. Discrepancy metrics for matrix comparison
+This appendix defines the matrix- and column-level discrepancy metrics used to compare
+the composed multi-step transition matrix Aprod, obtained by composing the prescribed
+single time-step transition matrices {Mt}, with the empirical matrix Apep estimated from
+realized PEP trajectories.
+Let
+D = Apep −Aprod ∈RN×N.
+Both matrices are column-stochastic matrices on the same node set.
+Unweighted metrics.
+Matrix ℓ1 norm: The matrix ℓ1 discrepancy is defined as
+∥D∥1 =
+N
+X
+i=1
+N
+X
+j=1
+|Dij|.
+This measures the total absolute deviation between the two matrices.
+Root-mean-square error (RMSE):. The RMSE is defined by
+RMSE(D) =
+v
+u
+u
+t 1
+N 2
+N
+X
+i=1
+N
+X
+j=1
+D2
+ij.
+This metric emphasizes large pointwise deviations while remaining scale-sensitive.
+22
+MOBILITY TRAJECTORIES FROM NETWORK-DRIVEN MARKOV DYNAMICS
+Mean column-wise ℓ1 deviation: For each origin column j, define the column discrepancy
+∥D·j∥1 =
+N
+X
+i=1
+|Dij|.
+The reported metric is the average over columns,
+1
+N
+N
+X
+j=1
+∥D·j∥1.
+Mean column-wise Jensen–Shannon divergence: For each column j, let p·j and q·j denote the
+j-th columns of Apep and Aprod, respectively, interpreted as probability distributions. The
+Jensen–Shannon divergence for column j is
+JS(p·j, q·j) = 1
+2KL(p·j∥m·j) + 1
+2KL(q·j∥m·j) ,
+where
+m·j = 1
+2(p·j + q·j)
+and KL(·∥·) denotes the Kullback–Leibler divergence. For two discrete probability distribu-
+tions p, q ∈RN with pi ≥0, qi ≥0, and P
+i pi = P
+i qi = 1, with the convention that terms
+with pi = 0 contribute zero. The reported value is the mean over all columns.
+Population-weighted metrics. Because different origin nodes contribute different numbers
+of realized trajectories, we also compute population-weighted versions of the column-wise
+metrics. Let
+wj =
+xt0(j)
+PN
+k=1 xt0(k)
+,
+where xt0(j) is the number of PEP trajectories originating at node j at the start of the
+verification window.
+Weighted ℓ1 deviation:
+N
+X
+j=1
+wj ∥D·j∥1.
+Weighted RMSE:.
+v
+u
+u
+t
+N
+X
+j=1
+wj
+ 
+1
+N
+N
+X
+i=1
+D2
+ij
+!
+.
+Weighted Jensen–Shannon divergence:
+N
+X
+j=1
+wj JS(p·j, q·j).
+These weighted metrics emphasize agreement for origins that contribute the largest frac-
+tion of realized flow and suppress noise arising from statistically sparse columns.

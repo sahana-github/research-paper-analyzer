@@ -1,0 +1,934 @@
+LA-UR-25-31265
+Constraining Hamiltonians from chiral effective field theory with neutron-star data
+Cassandra L. Armstrong,1, 2 Brendan T. Reed,3 Tate Plohr,4
+Henrik Rose,5 Soumi De,3 Rahul Somasundaram,3 and Ingo Tews3
+1Facility for Rare Isotope Beams, Michigan State University, East Lansing, Michigan 48824, USA∗
+2Intelligence and Space Research Division, Los Alamos National Laboratory, Los Alamos, NM 87545, USA
+3Theoretical Division, Los Alamos National Laboratory, Los Alamos, NM 87545, USA
+4Los Alamos High School, Los Alamos, NM 87544, USA
+5Institut f¨ur Physik und Astronomie, Universit¨at Potsdam,
+Haus 28, Karl-Liebknecht-Str.
+24/25, 14476, Potsdam, Germany
+(Dated: January 12, 2026)
+Multi-messenger observations of neutron stars (NSs) and their mergers have placed strong con-
+straints on the dense-matter equation of state (EOS). The EOS, in turn, depends on microscopic
+nuclear interactions that are described by nuclear Hamiltonians. These Hamiltonians are commonly
+derived within chiral effective field theory (EFT). Ideally, multi-messenger observations of NSs could
+be used to directly inform our understanding of EFT interactions, but such a direct inference neces-
+sitates millions of model evaluations. This is computationally prohibitive because each evaluation
+requires us to calculate the EOS from a Hamiltonian by solving the quantum many-body problem
+with methods such as auxiliary-field diffusion Monte Carlo (AFDMC), which provides very accu-
+rate and precise solutions but at a significant computational cost. Additionally, we need to solve
+the stellar structure equations for each EOS which further slows down each model evaluation by
+a few seconds. In this work, we combine emulators for AFDMC calculations of neutron matter,
+built using parametric matrix models, and for the stellar structure equations, built using multilayer
+perceptron neural networks, with the PyCBC data-analysis framework to enable a direct inference
+of coupling constants in an EFT Hamiltonian using multi-messenger observations of NSs. We find
+that astrophysical data can provide informative constraints on two-nucleon couplings despite the
+high densities probed in NS interiors.
+Introduction. Neutron-star (NS) cores explore densi-
+ties far larger than those in the center of atomic nuclei,
+providing unique opportunities to test theories of strong
+interactions [1–3]. The properties of NSs, such as their
+radii, masses, and tidal deformabilities, depend on micro-
+scopic interactions between nucleons at densities up to a
+few times the nuclear saturation density n0 ≃0.16 fm−3
+and, possibly, between exotic degrees of freedom at higher
+densities. Multi-messenger observations of NS properties
+can, therefore, directly inform our understanding of these
+interactions.
+Modern nuclear interactions are described by Hamilto-
+nians derived within chiral effective field theory (EFT),
+which provides a systematic expansion of nuclear forces
+in powers of the average nucleon momenta p over a break-
+down scale Λb [4, 5]. Chiral EFT Hamiltonians depend
+on a set of low-energy couplings (LECs) which deter-
+mine the strength of individual operator structures that
+appear at different orders in this expansion. In the two-
+nucleon (NN) sector, these LECs are typically adjusted to
+NN scattering data by solving the quantum-mechanical
+scattering problem [6–12]. In the three-nucleon (3N) sec-
+tor, the LECs are usually fit to ground-state properties
+of light nuclei or the triton β decay [13–20], but differ-
+ent fit protocols have been proposed [21, 22]. The chiral
+EFT Hamiltonians are then employed in predictive cal-
+culations of larger quantum many-body systems, such as
+∗armst520@msu.edu
+medium-mass to heavy atomic nuclei [22–31] or dense
+nuclear matter [16, 19, 32–38].
+Terrestrial nuclear systems, however, only explore
+small neutron-to-proton asymmetries and densities of the
+order of n0. Matter in NSs, in contrast, is very isospin-
+asymmetric and probes much larger densities. Adjusting
+nuclear forces and their LECs to properties of NS matter
+would provide valuable complementary constraints [39–
+42]. In this work, we explore how well data from NS mass
+measurements [43–45] from a gravitational-wave (GW)
+observation of two merging NSs, GW170817 [46], and
+from the Neutron Star Interior Composition Explorer
+(NICER) telescope [47–50] enable us to constrain the rel-
+evant LECs in a nuclear Hamiltonian from chiral EFT at
+next-to-next-to-leading order (N2LO) in neutron matter.
+Approach. To extract LECs from NS observations, our
+goal is to employ Bayesian inference to analyze astro-
+physical data. Bayesian inference necessitates millions of
+model evaluations, and hence, it requires us to be able
+to rapidly connect LECs with NS observables. To date,
+this connection is too computationally expensive. First,
+it requires solving the quantum many-body problem to
+obtain the dense-matter EOS from a given set of LECs,
+a process which costs 100,000’s of CPU hours per EOS.
+Second, NS observables are calculated from an EOS by
+solving the Tolman-Oppenheimer-Volkoff (TOV) equa-
+tions, which takes a few seconds per EOS. These two
+steps are prohibitively slow for Bayesian inference; typi-
+cally, likelihood evaluations need to be performed in less
+than ∼1s [51]. Therefore, reducing this computational
+arXiv:2601.05999v1  [nucl-th]  9 Jan 2026
+2
+FIG. 1. Priors (red) and posteriors of the analysis of astrophysical data for all six spectral LECs in neutron matter. The priors
+are results of fits to NN scattering data. The posterior for current astrophysical data includes gravitational-wave, maximum-
+mass, and NICER data (blue). We also show posteriors from analyses of simulated signals as expected to be observed by
+third-generation detectors for symmetric binaries with component masses of 1.0M⊙(black) and 1.4M⊙(green).
+burden is essential.
+Recent works have taken first steps in this direction.
+Refs. [39, 40] obtained constraints on a simplified Hamil-
+tonian with a single free parameter representing the
+strength of a phenomenological 3N force from NS ob-
+servations.
+However, a connection to 3N forces from
+EFT and the possible existence of non-nucleonic degrees
+of freedom at high densities were not addressed in that
+work. This was overcome in Ref. [42] where the two pion-
+nucleon LECs that determine the strength of chiral 3N
+forces in neutron matter at N2LO were studied using a
+more flexible EOS model. In both works, broad uniform
+prior distributions on the 3N LECs were employed and
+canonical constraints from nuclear experiments, such as
+NN scattering data analyzed consistently with EFT trun-
+cation uncertainties, were not taken into account.
+Here, we overcome these limitations and study the im-
+pact of NS observations on all unknown LECs in an N2LO
+Hamiltonian in neutron matter, rather than limiting our-
+selves to the 3N sector. We achieve this by combining
+our previously developed emulators [52] for auxiliary-field
+diffusion Monte Carlo (AFDMC) [53, 54] calculations of
+neutron matter and for the TOV equations [51] to es-
+tablish a direct connection of the LECs at N2LO with
+NS properties. As the long-range pion-nucleon LECs are
+very tightly constrained from experimental data [55, 56],
+we keep them fixed in this work. Then, the 3N sector
+in neutron matter is parameter-free at this order [32],
+and we effectively study the contact sector of the NN
+force. This allows us to analyze the interplay between
+NN scattering data and NS observations in constraining
+the Hamiltonian.
+We employ both of our emulators to sample over the
+LECs when analyzing NS data and performing GW infer-
+ence with PyCBC [57]. Prior information from NN scatter-
+ing data is incorporated in a hierarchical manner within
+PyCBC by implementing LEC posteriors from a scattering
+analysis [12] as GW priors. We present our main results
+in Fig. 1, and find that present astrophysical data pro-
+vide slight constraints on the relevant spectral LECs at
+N2LO if nuclear Hamiltonians are used up to 2n0. We
+also study the potential of next-generation GW detec-
+tors and find that these observatories can provide strong
+constraints on LECs, highlighting their high discovery
+potential for nuclear physics.
+Emulators for Dense Matter.
+For a given Hamilto-
+nian with a specified set of LECs, we employ AFDMC to
+calculate the EOS of pure neutron matter. AFDMC pro-
+vides very accurate and precise solutions to the quantum
+many-body problem but at a significant computational
+cost. We have employed the parametric matrix model
+(PMM) [58] to build emulators for AFDMC calculations
+3
+FIG. 2. Percent error of the MLP neural network emulators
+for MTOV (red), the radius (blue), and the tidal deformabil-
+ity (green) of a 1.4M⊙neutron star. In all panels, we show
+histograms for 70,000 validation samples.
+of pure neutron matter for local chiral EFT Hamiltonians
+at N2LO [52]. The PMM is based off of the reduced-basis
+method (RBM) [59–65] which identifies a relevant low-
+dimensional subspace that contains the solution space as
+the LECs in the Hamiltonian are varied. While the RBM
+explicitly calculates this subspace from high-fidelity so-
+lutions to the problem at hand, the PMM identifies this
+subspace implicitly through fitting matrix elements in a
+representative low-dimensional matrix equation directly
+to the AFDMC data. This equation is set up as an eigen-
+value problem for a matrix ˆH with the same structure as
+the chiral EFT Hamiltonian:
+ˆH = H0 + d1 · H1 + d2 · H2 + · · · ,
+(1)
+where the di are the LECs of the Hamiltonian, and e.g.,
+in the 2-dimensional case,
+ˆH =
+
+α β
+β γ
+
+, H0 =
+
+a 0
+0 b
+
+,
+H1 =
+
+c d
+d e
+
+, H2 =
+
+f g
+g h
+
+,
+(2)
+with real matrix elements a −h. These matrix elements
+are constrained by fitting the lowest eigenvalue of ˆH to
+AFDMC energies in neutron matter for ∼30 training
+LEC sets. At N2LO, there are nine operator LECs de-
+scribing NN forces, but only six combinations of these op-
+erator LECs, i.e. spectral LECs, contribute to pure neu-
+tron matter. The emulator is set up with the six relevant
+spectral LECs di. The 3N forces are fixed because, in
+neutron matter, they only depend on pion-nucleon LECs
+at N2LO.
+The emulators developed in Ref. [52] allow us to speed
+up AFDMC calculations by a factor of 108 while main-
+taining errors around 1%, which is comparable to the
+statistical uncertainty of AFDMC [53].
+This dramatic
+reduction of computational cost enables us to perform
+Bayesian inference. More details on our PMM emulator
+can be found in Ref. [52].
+Neutron-Star Equations of State. For a given set of
+LECs, the PMM allows us to calculate the neutron-
+matter energy per particle at 0.12, 0.16, 0.24, 0.32,
+0.48 fm−3. We then use the nuclear meta-model [66, 67]
+to extend the PMM output to neutron-star matter. The
+metamodel describes the energy per particle of nuclear
+matter at various densities and asymmetries in terms
+of the nuclear empirical parameters (NEPs), defined by
+Taylor expansions of the energy per particle in symmetric
+nuclear matter and of the symmetry energy.
+We first generate a set of symmetric-matter parame-
+ters.
+We fix Esat = −16 MeV and nsat = 0.16 fm−3,
+and sample Ksat, Qsat, and Zsat from the following
+Gaussian distributions: Ksat = 227 ± 18 MeV, Qsat =
+−172 ± 243 MeV, and Zsat = 1287 ± 1499 MeV [68].
+We then sample a set of six spectral LECs d11, d22, d3,
+d4, d6, and d7 from the posteriors of Ref. [12], and use
+the PMM to generate a neutron-matter EOS. With both
+curves specified, we fit the meta-model, and generate an
+EOS in beta equilibrium. For all models, we attach the
+crust of Douchin and Haensel [69] below 0.08 fm−3 fol-
+lowing the approach outlined in Ref. [70]. Therefore, each
+meta-model EOS depends on a set of 9 parameters.
+Because we cannot expect the nucleonic description of
+dense matter to be valid at the highest densities reached
+in the cores of NSs, we transition from the meta-model
+to a speed-of-sound extension [71–73] at a transition den-
+sity ntr = 2n0. We sample values of the squared speed
+of sound, c2
+i , uniformly between 10−5 and 1 on a den-
+sity grid ranging from 3n0 to 6n0 in steps of n0.
+We
+then connect these points by linear speed-of-sound seg-
+ments and choose the speed of sound to be constant after
+the last density point. Finally, we connect the speed-of-
+sound model to the meta model and construct the EOS
+at all densities up to 12n0. Each final EOS is, therefore,
+described by a total of 13 parameters.
+Emulators for neutron-star structure. To build emu-
+lators for the TOV equations, we follow Ref. [51] and
+employ multilayer-perceptron (MLP) neural networks.
+We generate mass–radius and mass–tidal-deformability
+curves for 270,000 EOS, and split these into a train-
+ing set (200,000 EOS) and a validation set (70,000
+EOS). We remove all samples with a maximum NS mass
+MTOV < 2M⊙because the observations of heavy pulsars
+with masses greater than 2M⊙rule these EOS out. We
+then build three separate MLP networks to respectively
+emulate MTOV, the radii r(m), and the tidal deformabil-
+ities Λ(m). Each MLP emulator takes the 13 parameters
+describing each EOS as input.
+To emulate MTOV, we train an MLP regressor to the
+MTOV of our training EOS. For the validation set, our
+emulator predicts MTOV with errors of ∼0.01%, see
+Fig. 2. To build emulators for the radii and tidal deforma-
+bilities, we define a mass grid of 30 uniformly spaced
+4
+points between 1M⊙and MTOV for each of the train-
+ing EOS. Two MLP regressors are then trained on the
+radii and the logarithm of the tidal deformabilities at
+the grid points, respectively. For any new parameter set,
+we first predict MTOV and then use the other emulators
+to infer radii and tidal deformabilities at the mass-grid
+points. We find that these emulators perform extremely
+well, with speed ups of two orders of magnitude [51] and
+errors around 0.01% over the validation set, see Fig. 2 for
+the error distributions for both quantities at 1.4M⊙. We
+show example outputs in the Supplemental Material.
+Multimessenger Data Analysis. Recent years have seen
+a wealth of new NS data. Radio observations of heavy
+pulsars have firmly established the existence of two-solar-
+mass NSs [43–45].
+The first gravitational-wave (GW)
+observation of a binary NS merger, GW170817 [46], con-
+strained the tidal deformability for a 1.4M⊙NS to be
+190+390
+−120 at the 90% credible level [74], implying the EOS
+to be rather soft up to (3 −4)n0. Finally, NICER has
+measured the masses and radii of four pulsars [47–50].
+To analyze GW170817 data, we follow Ref. [57] to im-
+plement the MLP networks in the PyCBC GW Bayesian
+analysis software. We compute the posterior p(⃗θ|d(t), H)
+by sampling over the parameters ⃗θ that enter the
+waveform model H, for which we choose the SEOB-
+NRv4T surrogate template [75]. The parameters ⃗θ are
+the 13 parameters that describe the EOS as well as
+the parameters describing the binary system.
+For the
+EOS parameters, we use our emulators to predict r(m)
+and Λ(m) between 1.0M⊙and MTOV. As in Ref. [57],
+we fix the sky and distance parameters to the ones for
+GW170817 [76, 77] and sample the source frame chirp
+mass Msrc
+c , mass ratio q, offset of trigger time ∆tc, incli-
+nation angle ι, and the two NS spins χ1z,2z, and marginal-
+ize the polarization angle and phase using a uniform prior
+from [0, 2π) for both. We compare the predicted wave-
+form to the strain data d(t) measured by the LIGO Han-
+ford, LIGO Livingston, and Virgo detectors [78, 79], by
+employing PyCBC Inference [80] and sample using the em-
+cee Markov Chain Monte Carlo (MCMC) sampler. The
+inference calls the emulator via a plug-in waveform model
+developed in Ref. [57].
+In Fig. 3, we show 9800 mass-radius relations drawn
+from the GW posterior of our PyCBC analysis. The main
+effect of the GW data is to rule out stiffer EOS, consis-
+tent with previous analyses [42, 46, 81–87]. We further
+apply the maximum-mass constraint by comparing the
+predicted Mmax for each EOS to the observed neutron
+star masses [70]. The likelihood is dominated by PSR
+J0740+6620 [45] with a mass of 2.08 ± 0.07 M⊙. Finally,
+we apply mass-radius constraints from the four NICER
+pulsars PSR J0030+0451 [47], PSR J0740+6620 [48],
+PSR J0437–4715 [49], and PSR J0614-3329 [50].
+For
+the first two pulsars, independent results have been pro-
+vided by the Maryland group of the NICER collabora-
+tion [85, 88]. Given all sources of data, we can put tight
+constraints on the NS mass-radius relation. We find the
+radius of a 1.4M⊙NS to be 11.6+0.7
+−0.5km at the 90% cred-
+FIG. 3.
+Mass-radius curves drawn from the GW posterior
+where the maximum-mass and NICER likelihoods are applied.
+The EOS are colored according to their posterior probabil-
+ity normalized to the highest value. We also show the four
+NICER contours at 95% credible level.
+ible level.
+Constraining Nuclear Interactions. Because we sam-
+ple over the EOS parameters during the data analysis,
+we can directly infer the LECs from multi-messenger ob-
+servations of NSs and their mergers.
+We present our
+results for the LECs given present astrophysical obser-
+vations in Fig. 1 and find that current NS data pro-
+vides modest information on some spectral LECs. While
+the distributions of the LECs that enter PNM through
+their contribution to singlet S-wave interactions (d22 and
+d3) [89] remain nearly unchanged, the distributions of the
+LECs entering the triplet P-wave channels (d11, d4, d6,
+and d7) undergo moderate change after the inference is
+performed. The astrophysical data reduces P-wave re-
+pulsion, which is in line with NS data preferring softer
+EOS. This is driven by both GW and NICER data which
+pull the LEC posteriors in the same direction, see the
+Supplemental Material. As a consequence, even present
+NS observations provide information on NN forces in the
+nuclear Hamiltonian, beyond what is provided by scat-
+tering data.
+Impact of Future Detectors. Future observations, for
+example by next-generation GW detectors such as Cos-
+mic Explorer [90, 91] or the Einstein Telescope [92, 93],
+will provide additional precision data that allows us to
+further constrain the LECs.
+To demonstrate this, we
+inject two simulated events into a detector network com-
+posed of two Cosmic Explorer interferometers and one
+Einstein Telescope. For both events, we chose most of
+the injection parameter values consistent with those that
+were inferred for GW170817. For the first event, the two
+component masses were taken to be 1.4 M⊙, leading to
+5
+0
+100
+200
+300
+400
+500
+Elab [MeV]
+50
+40
+30
+20
+10
+0
+Phaseshift 
+3P1 [degrees]
+PWA
+Prior
+Posterior 1.0-1.0
+FIG. 4. Phase shifts for the 3P1 partial wave at the 90% CI
+for the prior (blue) and the posterior obtained from the anal-
+ysis of the 1.0 −1.0 M⊙injection (red). We also show the
+results of the Nijmegen partial-wave analysis [94] for compar-
+ison (black).
+an SNR of ∼2300. For the second event, the two com-
+ponent masses were decreased to 1.0 M⊙to probe the
+sensitivity of the LECs to the NS masses.
+This event
+was found to have an SNR of ∼1730. The injected LEC
+values were chosen to be close to the 50th percentiles of
+the corresponding prior distributions. The obtained pos-
+teriors for the LECs are also shown in Fig. 1. We find
+that next-generation GW detectors can provide signifi-
+cant constraints on the LECs for these two events. Inter-
+estingly, the LECs are better constrained for the lower
+SNR (low-mass) event as it probes lower densities that
+are closer to the regime described by chiral EFT.
+Finally, for these next-generation posteriors, we re-
+examine the phase shifts in the triplet P-wave channels.
+We find no changes to the phase shift in the 3P0 partial
+wave and marginal changes in the 3P2 channel with re-
+spect to the priors. However, we observe a clear change in
+the 3P1 channel mainly at high energies ≳200 MeV, see
+Fig. 4. This channel is repulsive and leads to the largest
+of the P-wave phase shifts whereas 3P0 and 3P2 are both
+attractive and smaller in magnitude. As we found before,
+the data seems to overall reduce P-wave repulsion. This
+analysis serves as an important sensitivity study which
+demonstrates that, among the triplet P waves, the 3P1
+channel is more strongly correlated with the properties of
+NSs. In addition, the fact that the spectral LECs change
+considerably after next-generation data is included while
+the phase shift bands change only moderately shows that
+astrophysical data provides complementary information
+when compared to NN scattering.
+Summary and Outlook. In this work, we have used em-
+ulators based on the PMM and MLP machine-learning
+frameworks to constrain the relevant two-nucleon LECs
+in an N2LO chiral EFT Hamiltonian from NS data. We
+found that current observations only provide mild con-
+straints in addition to two-nucleon scattering measured
+in the lab, but that next-generation GW observatories
+provide strong and complimentary information on micro-
+scopic LECs. Our pipeline paves the way of measuring
+LECs that are difficult to extract from laboratory data.
+ACKNOWLEDGMENTS
+This work was supported by the U.S. Department
+of Energy through Los Alamos National Laboratory
+(LANL). LANL is operated by Triad National Se-
+curity, LLC, for the National Nuclear Security Ad-
+ministration of U.S. Department of Energy (Contract
+No. 89233218CNA000001). C.L.A., B.T.R., S.D., R.S.,
+and I.T. were supported by the Laboratory Directed Re-
+search and Development (LDRD) program of LANL un-
+der project number 20230315ER. C.L.A., R.S., and I.T.
+were also supported by the LDRD program of LANL un-
+der project number 20260260ER. C.L.A. and B.T.R. were
+also supported by LANL through its Center for Space
+and Earth Science, which is funded by LANL’s LDRD
+program under project number 20240477CR. B.T.R. and
+I.T. were also supported by the U.S. Department of En-
+ergy, Office of Science, Office of Nuclear Physics program
+under Award Number DE-SCL0000015.
+S.D. was also
+supported by the Laboratory Directed Research and De-
+velopment program of Los Alamos National Laboratory
+project 20250750ECR.
+[1] J. M. Lattimer and M. Prakash, The physics of neutron
+stars, Science 304, 536 (2004), arXiv:astro-ph/0405262.
+[2] A. L. Watts et al., Colloquium : Measuring the neu-
+tron star equation of state using x-ray timing, Rev.
+Mod. Phys. 88, 021001 (2016), arXiv:1602.01081 [astro-
+ph.HE].
+[3] K. Chatziioannou, H. T. Cromartie, S. Gandolfi, I. Tews,
+D. Radice, A. W. Steiner, and A. L. Watts, Neutron stars
+and the dense matter equation of state: from microscopic
+theory to macroscopic observations, arXiv:2407.11153
+[nucl-th] (2024).
+[4] E. Epelbaum, H.-W. Hammer, and U.-G. Meissner, Mod-
+ern Theory of Nuclear Forces, Rev. Mod. Phys. 81, 1773
+(2009), arXiv:0811.1338 [nucl-th].
+[5] R. Machleidt and D. R. Entem, Chiral effective field
+theory and nuclear forces, Phys. Rept. 503, 1 (2011),
+arXiv:1105.2919 [nucl-th].
+[6] D. R. Entem and R. Machleidt, Accurate charge depen-
+dent nucleon nucleon potential at fourth order of chiral
+perturbation theory, Phys. Rev. C 68, 041001 (2003),
+6
+arXiv:nucl-th/0304018.
+[7] E. Epelbaum, W. Glockle, and U.-G. Meissner, The Two-
+nucleon system at next-to-next-to-next-to-leading order,
+Nucl. Phys. A 747, 362 (2005), arXiv:nucl-th/0405048.
+[8] A.
+Gezerlis,
+I.
+Tews,
+E.
+Epelbaum,
+S.
+Gandolfi,
+K. Hebeler, A. Nogga, and A. Schwenk, Quantum Monte
+Carlo Calculations with Chiral Effective Field The-
+ory Interactions, Phys. Rev. Lett. 111, 032501 (2013),
+arXiv:1303.6243 [nucl-th].
+[9] M. Piarulli, L. Girlanda, R. Schiavilla, R. Navarro P´erez,
+J. E. Amaro, and E. Ruiz Arriola, Minimally nonlocal
+nucleon-nucleon potentials with chiral two-pion exchange
+including ∆resonances, Phys. Rev. C 91, 024003 (2015),
+arXiv:1412.6446 [nucl-th].
+[10] P. Reinert,
+H. Krebs, and E. Epelbaum, Semilocal
+momentum-space regularized chiral two-nucleon poten-
+tials up to fifth order, Eur. Phys. J. A 54, 86 (2018),
+arXiv:1711.08821 [nucl-th].
+[11] D. R. Entem,
+R. Machleidt, and Y. Nosyk, High-
+quality two-nucleon potentials up to fifth order of the
+chiral expansion, Phys. Rev. C 96, 024004 (2017),
+arXiv:1703.05454 [nucl-th].
+[12] R. Somasundaram, J. E. Lynn, L. Huth, A. Schwenk,
+and I. Tews, Maximally local two-nucleon interactions at
+N3LO in ∆-less chiral effective field theory, Phys. Rev.
+C 109, 034005 (2024), arXiv:2306.13579 [nucl-th].
+[13] P. Navratil, V. G. Gueorguiev, J. P. Vary, W. E. Ormand,
+and A. Nogga, Structure of A=10-13 nuclei with two
+plus three-nucleon interactions from chiral effective field
+theory, Phys. Rev. Lett. 99, 042501 (2007), arXiv:nucl-
+th/0701038.
+[14] D. Gazit, S. Quaglioni, and P. Navratil, Three-Nucleon
+Low-Energy Constants from the Consistency of Interac-
+tions and Currents in Chiral Effective Field Theory, Phys.
+Rev. Lett. 103, 102502 (2009), [Erratum: Phys.Rev.Lett.
+122, 029901 (2019)], arXiv:0812.4444 [nucl-th].
+[15] K. Hebeler, S. K. Bogner, R. J. Furnstahl, A. Nogga,
+and A. Schwenk, Improved nuclear matter calculations
+from chiral low-momentum interactions, Phys. Rev. C
+83, 031301 (2011), arXiv:1012.3381 [nucl-th].
+[16] J. E. Lynn, I. Tews, J. Carlson, S. Gandolfi, A. Gezerlis,
+K. E. Schmidt, and A. Schwenk, Chiral Three-Nucleon
+Interactions in Light Nuclei, Neutron-α Scattering, and
+Neutron Matter, Phys. Rev. Lett. 116, 062501 (2016),
+arXiv:1509.03470 [nucl-th].
+[17] M.
+Piarulli
+et
+al.,
+Light-nuclei
+spectra
+from
+chi-
+ral dynamics, Phys. Rev. Lett. 120, 052503 (2018),
+arXiv:1707.02883 [nucl-th].
+[18] E. Epelbaum et al. (LENPIC), Few- and many-nucleon
+systems with semilocal coordinate-space regularized chi-
+ral two- and three-body forces, Phys. Rev. C 99, 024313
+(2019), arXiv:1807.02848 [nucl-th].
+[19] I. Tews, R. Somasundaram, D. Lonardoni, H. G¨ottling,
+R. Seutin, J. Carlson, S. Gandolfi, K. Hebeler, and
+A. Schwenk, Neutron matter from local chiral effective
+field theory interactions at large cutoffs, Phys. Rev. Res.
+7, 033024 (2025), arXiv:2407.08979 [nucl-th].
+[20] R.
+Curry,
+K.
+Hebeler,
+S.
+Gandolfi,
+A.
+Gezerlis,
+A. Schwenk, R. Somasundaram, and I. Tews, Quantum
+Monte Carlo Calculations of Light Nuclei with Fully
+Propagated Theoretical Uncertainties, arXiv:2510.15860
+[nucl-th] (2025).
+[21] A. Ekstr¨om, G. R. Jansen, K. A. Wendt, G. Hagen,
+T. Papenbrock, B. D. Carlsson, C. Forss´en, M. Hjorth-
+Jensen, P. Navr´atil, and W. Nazarewicz, Accurate nu-
+clear radii and binding energies from a chiral interaction,
+Phys. Rev. C 91, 051301 (2015), [Erratum: Phys.Rev.C
+109, 059901 (2024)], arXiv:1502.04682 [nucl-th].
+[22] P. Arthuis, K. Hebeler, and A. Schwenk, Neutron-rich
+nuclei and neutron skins from chiral low-resolution inter-
+actions, arXiv:2401.06675 [nucl-th] (2024).
+[23] S. R. Stroberg, J. D. Holt, A. Schwenk, and J. Simonis,
+AbInitio Limits of Atomic Nuclei, Phys. Rev. Lett. 126,
+022501 (2021), arXiv:1905.10475 [nucl-th].
+[24] T. Miyagi, S. R. Stroberg, P. Navr´atil, K. Hebeler, and
+J. D. Holt, Converged ab initio calculations of heavy nu-
+clei, Phys. Rev. C 105, 014302 (2022), arXiv:2104.04688
+[nucl-th].
+[25] B. Hu et al., Ab initio predictions link the neutron skin
+of 208Pb to nuclear forces, Nature Phys. 18, 1196 (2022),
+arXiv:2112.01125 [nucl-th].
+[26] K. Hebeler, V. Durant, J. Hoppe, M. Heinz, A. Schwenk,
+J. Simonis, and A. Tichai, Normal ordering of three-
+nucleon interactions for ab initio calculations of heavy nu-
+clei, Phys. Rev. C 107, 024310 (2023), arXiv:2211.16262
+[nucl-th].
+[27] T. Miyagi, X. Cao, R. Seutin, S. Bacca, R. F. Gar-
+cia Ruiz, K. Hebeler, J. D. Holt, and A. Schwenk, Im-
+pact of Two-Body Currents on Magnetic Dipole Mo-
+ments of Nuclei, Phys. Rev. Lett. 132, 232503 (2024),
+arXiv:2311.14383 [nucl-th].
+[28] M. Door et al., Probing New Bosons and Nuclear Struc-
+ture with Ytterbium Isotope Shifts, Phys. Rev. Lett. 134,
+063002 (2025), arXiv:2403.07792 [physics.atom-ph].
+[29] F. Bonaiti, G. Hagen, and T. Papenbrock, Structure of
+the doubly magic nuclei 208Pb and 266Pb from ab initio
+computations, arXiv:2508.14217 [nucl-th] (2025).
+[30] Z. Li, T. Miyagi, and A. Schwenk, Ab initio calculations
+of beta-decay half-lives for N = 50 neutron-rich nuclei,
+arXiv:2509.06812 [nucl-th] (2025).
+[31] J. Kuske, T. Miyagi, A. Arcones, and A. Schwenk, r-
+process nucleosynthesis with ab initio nuclear masses
+around the N=82 shell closure, arXiv:2509.19131 [astro-
+ph.HE] (2025).
+[32] K. Hebeler and A. Schwenk, Chiral three-nucleon forces
+and neutron matter, Phys. Rev. C 82, 014314 (2010),
+arXiv:0911.0483 [nucl-th].
+[33] I. Tews, T. Kr¨uger, K. Hebeler, and A. Schwenk, Neu-
+tron matter at next-to-next-to-next-to-leading order in
+chiral effective field theory, Phys. Rev. Lett. 110, 032504
+(2013), arXiv:1206.0025 [nucl-th].
+[34] C. Drischler, K. Hebeler, and A. Schwenk, Chiral inter-
+actions up to next-to-next-to-next-to-leading order and
+nuclear saturation, Phys. Rev. Lett. 122, 042501 (2019),
+arXiv:1710.08220 [nucl-th].
+[35] C. Drischler, J. A. Melendez, R. J. Furnstahl, and D. R.
+Phillips, Quantifying uncertainties and correlations in
+the nuclear-matter equation of state, Phys. Rev. C 102,
+054315 (2020), arXiv:2004.07805 [nucl-th].
+[36] A. Lovato, I. Bombaci, D. Logoteta, M. Piarulli, and
+R. B. Wiringa, Benchmark calculations of infinite neu-
+tron matter with realistic two- and three-nucleon poten-
+tials, Phys. Rev. C 105, 055808 (2022), arXiv:2202.10293
+[nucl-th].
+[37] J. Keller, K. Hebeler, and A. Schwenk, Nuclear Equation
+of State for Arbitrary Proton Fraction and Temperature
+Based on Chiral Effective Field Theory and a Gaussian
+Process Emulator, Phys. Rev. Lett. 130, 072701 (2023),
+7
+arXiv:2204.14016 [nucl-th].
+[38] F. Marino, W. Jiang, and S. J. Novario, Diagrammatic
+ab initio methods for infinite nuclear matter with mod-
+ern chiral interactions, Phys. Rev. C 110, 054322 (2024),
+arXiv:2407.17098 [nucl-th].
+[39] A. Maselli, A. Sabatucci, and O. Benhar, Constrain-
+ing three-nucleon forces with multimessenger data, Phys.
+Rev. C 103, 065804 (2021), arXiv:2010.03581 [astro-
+ph.HE].
+[40] A. Sabatucci,
+O. Benhar,
+A. Maselli, and C. Pa-
+cilio, Sensitivity of neutron star observations to three-
+nucleon forces, Phys. Rev. D 106, 083010 (2022),
+arXiv:2206.11286 [astro-ph.HE].
+[41] H. Rose, N. Kunert, T. Dietrich, P. T. H. Pang, R. Smith,
+C. Van Den Broeck, S. Gandolfi, and I. Tews, Reveal-
+ing the strength of three-nucleon interactions with the
+proposed Einstein Telescope, Phys. Rev. C 108, 025811
+(2023), arXiv:2303.11201 [astro-ph.HE].
+[42] R. Somasundaram, I. Svensson, S. De, A. E. Deneris,
+Y. Dietz, P. Landry, A. Schwenk, and I. Tews, Inferring
+three-nucleon couplings from multi-messenger neutron-
+star observations, Nature Commun. 16, 9819 (2025),
+arXiv:2410.00247 [nucl-th].
+[43] J. Antoniadis et al., A Massive Pulsar in a Com-
+pact Relativistic Binary, Science 340, 6131 (2013),
+arXiv:1304.6875 [astro-ph.HE].
+[44] Z. Arzoumanian et al. (NANOGrav), The NANOGrav
+11-year Data Set:
+High-precision timing of 45 Mil-
+lisecond Pulsars, Astrophys. J. Suppl. 235, 37 (2018),
+arXiv:1801.01837 [astro-ph.HE].
+[45] E. Fonseca et al., Refined Mass and Geometric Measure-
+ments of the High-mass PSR J0740+6620, Astrophys. J.
+Lett. 915, L12 (2021), arXiv:2104.00880 [astro-ph.HE].
+[46] B. P. Abbott et al. (LIGO Scientific, Virgo), GW170817:
+Observation of Gravitational Waves from a Binary Neu-
+tron Star Inspiral, Phys. Rev. Lett. 119, 161101 (2017),
+arXiv:1710.05832 [gr-qc].
+[47] S. Vinciguerra et al., An Updated Mass–Radius Analysis
+of the 2017–2018 NICER Data Set of PSR J0030+0451,
+Astrophys. J. 961, 62 (2024), arXiv:2308.09469 [astro-
+ph.HE].
+[48] T. Salmi et al., The Radius of the High-mass Pulsar PSR
+J0740+6620 with 3.6 yr of NICER Data, Astrophys. J.
+974, 294 (2024), arXiv:2406.14466 [astro-ph.HE].
+[49] D. Choudhury et al., A NICER View of the Nearest and
+Brightest Millisecond Pulsar: PSR J0437–4715, Astro-
+phys. J. Lett. 971, L20 (2024), arXiv:2407.06789 [astro-
+ph.HE].
+[50] L. Mauviard et al., A NICER view of the 1.4 solar-
+mass edge-on pulsar PSR J0614–3329, arXiv:2506.14883
+[astro-ph.HE] (2025).
+[51] B. T. Reed, R. Somasundaram, S. De, C. L. Armstrong,
+P. Giuliani, C. Capano, D. A. Brown, and I. Tews, To-
+ward Accelerated Nuclear-physics Parameter Estimation
+from Binary Neutron Star Mergers: Emulators for the
+Tolman–Oppenheimer–Volkoff Equations, Astrophys. J.
+974, 285 (2024), arXiv:2405.20558 [astro-ph.HE].
+[52] C. L. Armstrong,
+P. Giuliani,
+K. Godbey,
+R. So-
+masundaram, and I. Tews, Emulators for Scarce and
+Noisy Data:
+Application to Auxiliary-Field Diffusion
+Monte Carlo for Neutron Matter, Phys. Rev. Lett. 135,
+142501 (2025), arXiv:2502.03680 [nucl-th].
+[53] J. Carlson, S. Gandolfi, F. Pederiva, S. C. Pieper, R. Schi-
+avilla, K. E. Schmidt, and R. B. Wiringa, Quantum
+Monte Carlo methods for nuclear physics, Rev. Mod.
+Phys. 87, 1067 (2015), arXiv:1412.3081 [nucl-th].
+[54] J. E. Lynn, I. Tews, S. Gandolfi, and A. Lovato, Quan-
+tum Monte Carlo Methods in Nuclear Physics: Recent
+Advances, Ann. Rev. Nucl. Part. Sci. 69, 279 (2019),
+arXiv:1901.04868 [nucl-th].
+[55] M. Hoferichter, J. Ruiz de Elvira, B. Kubis, and U.-G.
+Meißner, Roy–Steiner-equation analysis of pion–nucleon
+scattering, Phys. Rept. 625, 1 (2016), arXiv:1510.06039
+[hep-ph].
+[56] D.
+Siemens,
+J.
+Ruiz
+de
+Elvira,
+E.
+Epelbaum,
+M. Hoferichter, H. Krebs, B. Kubis, and U. G. Meißner,
+Reconciling threshold and subthreshold expansions for
+pion–nucleon scattering, Phys. Lett. B 770, 27 (2017),
+arXiv:1610.08978 [nucl-th].
+[57] B. T. Reed, C. L. Armstrong, R. Somasundaram, C. Ca-
+pano, S. De, and I. Tews, Direct Inference of Nuclear
+Equation-of-State Parameters from Gravitational-Wave
+Observations, arXiv:2506.15984 [astro-ph.HE] (2025).
+[58] P. Cook, D. Jammooa, M. Hjorth-Jensen, D. D. Lee,
+and D. Lee, Parametric Matrix Models, arXiv:2401.11694
+[cs.LG] (2024).
+[59] D. Frame, R. He, I. Ipsen, D. Lee, D. Lee, and E. Rrapaj,
+Eigenvector continuation with subspace learning, Phys.
+Rev. Lett. 121, 032501 (2018).
+[60] S.
+K¨onig,
+A.
+Ekstr¨om,
+K.
+Hebeler,
+D.
+Lee,
+and
+A. Schwenk, Eigenvector continuation as an efficient and
+accurate emulator for uncertainty quantification, Physics
+Letters B 810, 135814 (2020), arXiv:1909.08446 [nucl-th].
+[61] E. Bonilla, P. Giuliani, K. Godbey, and D. Lee, Training
+and projecting: A reduced basis method emulator for
+many-body physics, Phys. Rev. C 106, 054322 (2022),
+arXiv:2203.05284 [nucl-th].
+[62] C. Drischler, J. A. Melendez, R. J. Furnstahl, A. J. Gar-
+cia, and X. Zhang, BUQEYE guide to projection-based
+emulators in nuclear physics, Front. in Phys. 10, 1092931
+(2022), arXiv:2212.04912 [nucl-th].
+[63] J. A. Melendez, C. Drischler, R. J. Furnstahl, A. J.
+Garcia, and X. Zhang, Model reduction methods for
+nuclear
+emulators,
+J.
+Phys.
+G
+49,
+102001
+(2022),
+arXiv:2203.05528 [nucl-th].
+[64] T. Duguet, A. Ekstr¨om, R. J. Furnstahl, S. K¨onig,
+and D. Lee, Colloquium: Eigenvector continuation and
+projection-based emulators, Rev. Mod. Phys. 96, 031002
+(2024), arXiv:2310.19419 [nucl-th].
+[65] P. Giuliani, K. Godbey, E. Bonilla, F. Viens, and
+J. Piekarewicz, Bayes goes fast: Uncertainty quantifica-
+tion for a covariant energy density functional emulated
+by the reduced basis method, Frontiers in Physics 10,
+1054524 (2023), arXiv:2209.13039 [nucl-th].
+[66] J. Margueron, R. Hoffmann Casali, and F. Gulminelli,
+Equation of state for dense nucleonic matter from meta-
+modeling. I. Foundational aspects, Phys. Rev. C 97,
+025805 (2018), arXiv:1708.06894 [nucl-th].
+[67] J. Margueron, R. Hoffmann Casali, and F. Gulminelli,
+Equation of state for dense nucleonic matter from meta-
+modeling. II. Predictions for neutron star properties,
+Phys. Rev. C 97, 025806 (2018), arXiv:1708.06895 [nucl-
+th].
+[68] R. Somasundaram, C. Drischler, I. Tews, and J. Mar-
+gueron, Constraints on the nuclear symmetry energy
+from asymmetric-matter calculations with chiral NN
+and 3N interactions, Phys. Rev. C 103, 045803 (2021),
+arXiv:2009.04737 [nucl-th].
+8
+[69] F. Douchin and P. Haensel, A unified equation of state
+of dense matter and neutron star structure, Astron. As-
+trophys. 380, 151 (2001), arXiv:astro-ph/0111092.
+[70] H. Koehn et al., From existing and new nuclear and as-
+trophysical constraints to stringent limits on the equation
+of state of neutron-rich dense matter, Phys. Rev. X 15,
+021014 (2025), arXiv:2402.04172 [astro-ph.HE].
+[71] I. Tews, J. Margueron, and S. Reddy, Critical examina-
+tion of constraints on the equation of state of dense mat-
+ter obtained from GW170817, Phys. Rev. C 98, 045804
+(2018), arXiv:1804.02783 [nucl-th].
+[72] S. K. Greif, G. Raaijmakers, K. Hebeler, A. Schwenk, and
+A. L. Watts, Equation of state sensitivities when inferring
+neutron star and dense matter properties, Mon. Not. Roy.
+Astron. Soc. 485, 5363 (2019), arXiv:1812.08188 [astro-
+ph.HE].
+[73] R. Somasundaram, I. Tews, and J. Margueron, In-
+vestigating signatures of phase transitions in neutron-
+star
+cores,
+Phys.
+Rev.
+C
+107,
+025801
+(2023),
+arXiv:2112.08157 [nucl-th].
+[74] B. P. Abbott et al. (LIGO Scientific, Virgo), GW170817:
+Measurements of neutron star radii and equation of state,
+Phys. Rev. Lett. 121, 161101 (2018), arXiv:1805.11581
+[gr-qc].
+[75] G. Pratten, L. M. Thomas, and A. Ramos Buades, Lal-
+suite waveform data, 10.5281/zenodo.14999310 (2025).
+[76] M. Soares-Santos et al. (DES, Dark Energy Camera
+GW-EM), The Electromagnetic Counterpart of the Bi-
+nary Neutron Star Merger LIGO/Virgo GW170817. I.
+Discovery of the Optical Counterpart Using the Dark
+Energy Camera, Astrophys. J. Lett. 848, L16 (2017),
+arXiv:1710.05459 [astro-ph.HE].
+[77] M. Cantiello et al., A Precise Distance to the Host Galaxy
+of the Binary Neutron Star Merger GW170817 Using Sur-
+face Brightness Fluctuations, Astrophys. J. Lett. 854,
+L31 (2018), arXiv:1801.06080 [astro-ph.GA].
+[78] M. Vallisneri, J. Kanner, R. Williams, A. Weinstein, and
+B. Stephens, The LIGO Open Science Center, J. Phys.
+Conf. Ser. 610, 012021 (2015), arXiv:1410.4839 [gr-qc].
+[79] R. Abbott et al. (LIGO Scientific, Virgo), Open data
+from the first and second observing runs of Advanced
+LIGO and Advanced Virgo, SoftwareX 13, 100658
+(2021), arXiv:1912.11716 [gr-qc].
+[80] C. M. Biwer, C. D. Capano, S. De, M. Cabero, D. A.
+Brown, A. H. Nitz, and V. Raymond, PyCBC Inference:
+A Python-based parameter estimation toolkit for com-
+pact binary coalescence signals, Publ. Astron. Soc. Pac.
+131, 024503 (2019), arXiv:1807.10312 [astro-ph.IM].
+[81] E. Annala,
+T. Gorda,
+A. Kurkela, and A. Vuori-
+nen, Gravitational-wave constraints on the neutron-star-
+matter Equation of State, Phys. Rev. Lett. 120, 172703
+(2018), arXiv:1711.02644 [astro-ph.HE].
+[82] C. D. Capano, I. Tews, S. M. Brown, B. Margalit, S. De,
+S. Kumar, D. A. Brown, B. Krishnan, and S. Reddy,
+Stringent constraints on neutron-star radii from multi-
+messenger observations and nuclear theory, Nature As-
+tron. 4, 625 (2020), arXiv:1908.10352 [astro-ph.HE].
+[83] T. Dietrich, M. W. Coughlin, P. T. H. Pang, M. Bulla,
+J. Heinzel, L. Issa, I. Tews, and S. Antier, Multimes-
+senger constraints on the neutron-star equation of state
+and the Hubble constant, Science 370, 1450 (2020),
+arXiv:2002.11355 [astro-ph.HE].
+[84] R. Essick, I. Tews, P. Landry, and A. Schwenk, As-
+trophysical Constraints on the Symmetry Energy and
+the Neutron Skin of Pb208 with Minimal Modeling
+Assumptions, Phys. Rev. Lett. 127, 192701 (2021),
+arXiv:2102.10074 [nucl-th].
+[85] M. C. Miller et al., The Radius of PSR J0740+6620 from
+NICER and XMM-Newton Data, Astrophys. J. Lett.
+918, L28 (2021), arXiv:2105.06979 [astro-ph.HE].
+[86] G. Raaijmakers, S. K. Greif, K. Hebeler, T. Hinderer,
+S. Nissanke, A. Schwenk, T. E. Riley, A. L. Watts,
+J. M. Lattimer, and W. C. G. Ho, Constraints on the
+Dense Matter Equation of State and Neutron Star Prop-
+erties from NICER’s Mass–Radius Estimate of PSR
+J0740+6620 and Multimessenger Observations, Astro-
+phys. J. Lett. 918, L29 (2021), arXiv:2105.06981 [astro-
+ph.HE].
+[87] N. Rutherford et al., Constraining the Dense Matter
+Equation of State with New NICER Mass–Radius Mea-
+surements and New Chiral Effective Field Theory Inputs,
+Astrophys. J. Lett. 971, L19 (2024), arXiv:2407.06790
+[astro-ph.HE].
+[88] M. C. Miller et al., PSR J0030+0451 Mass and Radius
+from NICER Data and Implications for the Properties
+of Neutron Star Matter, Astrophys. J. Lett. 887, L24
+(2019), arXiv:1912.05705 [astro-ph.HE].
+[89] A. Gezerlis, I. Tews, E. Epelbaum, M. Freunek, S. Gan-
+dolfi, K. Hebeler, A. Nogga, and A. Schwenk, Local chi-
+ral effective field theory interactions and quantum Monte
+Carlo applications, Phys. Rev. C 90, 054323 (2014),
+arXiv:1406.0454 [nucl-th].
+[90] D. Reitze et al., Cosmic Explorer: The U.S. Contribu-
+tion to Gravitational-Wave Astronomy beyond LIGO,
+Bull. Am. Astron. Soc. 51, 035 (2019), arXiv:1907.04833
+[astro-ph.IM].
+[91] M.
+Evans
+et
+al.,
+A
+Horizon
+Study
+for
+Cosmic
+Explorer:
+Science,
+Observatories,
+and
+Community,
+arXiv:2109.09882 [astro-ph.IM] (2021).
+[92] M. Punturo et al., The Einstein Telescope:
+A third-
+generation gravitational wave observatory, Class. Quant.
+Grav. 27, 194002 (2010).
+[93] M. Maggiore et al. (ET), Science Case for the Ein-
+stein Telescope, JCAP 03, 050, arXiv:1912.02622 [astro-
+ph.CO].
+[94] V. G. J. Stoks, R. A. M. Klomp, M. C. M. Rentmeester,
+and J. J. de Swart, Partial wave analaysis of all nucleon-
+nucleon scattering data below 350-MeV, Phys. Rev. C
+48, 792 (1993).
+9
+SUPPLEMENTAL MATERIAL
+A.
+Emulators for TOV
+In Fig. 5, we show a set of example mass–radius and mass–tidal-deformability curves from the validation set. We
+find excellent agreement between the original high-fidelity EOS and the emulator output.
+FIG. 5. Examples of solutions to the TOV equations using the high-fidelity solver (lines) and the emulator predictions (points).
+Left: Mass–radius relations. Right: Mass–tidal-deformability curves.
+B.
+LEC inference at every stage of the analysis
+In Fig. 6, we show the results of the LEC inference using current astrophysical data at each step in the analysis, so
+GW data only, GW and maximum mass data, and finally the full result shown in Fig. 1 of the main manuscript.
+FIG. 6. Priors (red) and posteriors at different stages in the analysis of astrophysical data for all six spectral LECs in neutron
+matter. The priors are results of fits to NN scattering data. The posteriors include only GW data (green), GW and maximum-
+mass data (blue), and GW, maximum-mass, and NICER data (blue).

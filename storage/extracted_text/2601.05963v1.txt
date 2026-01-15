@@ -1,0 +1,966 @@
+Coherence properties of collective modes in ensembles of oscillators
+Arkady Pikovsky,1, ∗Franco Bagnoli,2, 3, † and Stefano Iubini4, 3, ‡
+1Department of Physics and Astronomy, University of Potsdam,
+Karl-Liebknecht-Str.
+24/25, 14476, Potsdam-Golm, Germany
+2Department of Physics and Astronomy and CSDC, University of Florence,
+via G. Sansone 1, I-50019, Sesto Fiorentino, Italy†
+3Istituto Nazionale di Fisica Nucleare, Sezione di Firenze,
+via G. Sansone 1, I-50019, Sesto Fiorentino, Italy
+4Istituto dei Sistemi Complessi, Consiglio Nazionale delle Ricerche,
+via Madonna del Piano 10, I-50019, Sesto Fiorentino, Italy
+(Dated: January 12, 2026)
+Synchronization transition in oscillatory networks manifests itself as the appearance of a periodic
+global mode. While perfect in the thermodynamic limit, this mode fluctuates for finite ensembles.
+We characterize the coherence of this mode in terms of the phase diffusion constant. In several
+examples, we always observed normal diffusion, but the dependence of the diffusion constant on the
+system size D ∼N −µ depends on the nature of coupled units: for coupled chaotic systems µ = 1,
+while for coupled periodic oscillators we observe, depending on the particular model, µ = 2 and
+µ = 2.5. These large values of the power index are attributed to the size-dependence of collective
+chaos in the finite ensemble, which disappears in the thermodynamic limit. We also show that in
+the standard Kuramoto model for a symmetric set of frequencies, there is an additional transition
+to a symmetric chaotic state with vanishing diffusion of the global phase.
+Introduction. Clocks are not perfect: due to ambient
+noise, the coherence time is finite. The phase of the pe-
+riodic self-sustained oscillators diffuses due to noise, and
+the diffusion constant, which has the dimension of inverse
+time, determines the coherence time and the width of the
+spectral peak [1, 2]. This concept can also be applied
+to collective oscillating modes appearing due to synchro-
+nization of individual units in large ensembles [3, 4]. Such
+transitions are usually theoretically treated in the ther-
+modynamic limit of an infinite number of units [5, 6]. In
+this limit, the transition to synchrony appears as a tran-
+sition from a steady to oscillating mean field (typically
+via a Hopf bifurcation [5, 7, 8]). A periodic regime in the
+thermodynamic limit has infinite coherence time (except
+for cases where the collective mode in the thermodynamic
+limit is chaotic [9–12]; we do not consider such regimes
+in this Letter).
+In experimental realizations of the synchronization
+transition, the number of interacting units N is neces-
+sarily finite, and in many cases rather small: 64 chemical
+oscillators in [13, 14]; 72 electronic oscillators in [15]; 108
+and 690 Josephson junctions in [16]; 40 photochemical
+oscillators in [17]; 1600 chemical Belousov-Zhabotinsky
+oscillators in [18]; several hundreds of lasers in [19]; 30
+metronoms in [20]. In some cases, the number of inter-
+acting units is itself a bifurcation parameter.
+For ex-
+ample, the collective mode of the Millennium Bridge in
+London appeared when the number of walkers exceeded
+N = 164 [21].
+For a finite number of coupled elements, the appear-
+ing global mode is subject to finite-size fluctuations (un-
+less the full locking at a large coupling strength occurs).
+These fluctuations have been explored numerically and
+theoretically in [22–35]. However, in most cases, the fo-
+cus was not on the coherence properties of the phase of
+the collective mode, but on the finite-size effects in the
+amplitude dynamics. Only in Refs. [24, 32] has the phase
+diffusion constant been demonstrated to scale ∼N −1
+with the population size, for coupled noisy oscillators.
+Another situation in which the diffusion of the phase of
+the collective mode was studied is the Hamiltonian mean-
+field model [36, 37]. There, due to momentum conserva-
+tion, the dominant mode of motion of the collective phase
+is a ballistic one, with a transition to normal diffusion at
+a time that diverges with the system size.
+The goal of this Letter is to explore properties of the
+diffusion of the collective mode in ensembles of determin-
+istic units. We demonstrate that coupled chaotic oscilla-
+tors produce a regular mode with phase diffusion scaling
+∼N −1, like for coupled noisy units [24, 32]. On the con-
+trary, for ensembles of periodic oscillators, we observe
+much stronger decay of the diffusion with the system
+size. We also describe a remarkable transition, due to
+symmetry, in the standard Kuramoto system to a fully
+phase-coherent (but still chaotic) regime with quenched
+diffusion.
+Before proceeding to the consideration of particular
+systems, let us discuss the general conditions for the ex-
+istence of the global phase. Suppose that in the thermo-
+dynamic limit, there is a Hopf-type transition from static
+to oscillating mean field at critical coupling εc. One usu-
+ally characterizes the transition with the amplitude of
+global oscillations R, which is zero for ε < εc and is pos-
+itive for ε > εc. Fluctuations due to finite-size effects
+smear the transition, so that the amplitude R fluctuates
+and is non-zero at all couplings, and the average of R
+grows rapidly around εc. Still, as long as the amplitude
+of collective oscillations can vanish (or be very small) at
+arXiv:2601.05963v1  [nlin.CD]  9 Jan 2026
+2
+some instants of time, the phase of these oscillations is
+ill-defined. Only when the amplitude R is distinct from
+zero is the phase well-defined. The criterion for the on-
+set of the global oscillating mode based on finding the
+coupling strength εR beyond which Rmin > γ for some
+small threshold γ, has been suggested and used in exper-
+iments [15, 38] and numerically explored in [39]. Clearly,
+the threshold for existence of the global collective mode
+εR depends on the system size and εR becomes closer to
+εc from above as N →∞; this threshold defines the do-
+main with a well-defined phase where the phase diffusion
+properties can be explored.
+Kuramoto-Sakaguchi ensemble. Our first model is the
+Kuramoto-Sakaguchi (KS) system of globally coupled
+phase oscillators [40]
+˙φk = ωk + ε
+N
+N
+X
+j=1
+sin(φj −φk −α), k = 1, . . . N .
+(1)
+The Kuramoto order parameter
+Z(t) = N −1 X
+k
+exp[iφk(t)] = R(t) exp[iΘ(t)]
+(2)
+can be considered as the complex amplitude of the col-
+lective mode, where R is the real amplitude and Θ is the
+phase of the collective global mode. We expect that for
+ε > εR, where the amplitude R is separated from zero,
+the phase Θ is well-defined, and one can calculate its aver-
+aged rotation velocity Ω= limT →∞T −1(Θ(T)−Θ(0)), as
+well as the diffusion constant D = limT →∞T −1⟨(Θ(T)−
+Θ(0) −ΩT)2⟩. The relevant parameter in problem (1)
+is the distribution of frequencies g(ω). In simple cases
+like Gaussian and Cauchy distributions (because of rota-
+tional invariance, one can set the center of the distribu-
+tion at ω = 0), transition to synchrony in the thermody-
+namic limit occurs via a Hopf bifurcation to a state with
+R = const and Ω= const.
+In the simulation of a finite ensemble, one has to fix
+a way of choosing frequencies ωk.
+We first consider a
+regular sampling [22, 26, 30, 33, 35] according to relation
+R ωk
+−∞g(ξ)dξ = (k −1/2)/N. This yields just one system
+for each N. Below we adopt for g(ω) a Gaussian dis-
+tribution with unit variance. Fig. 1 shows an example
+of the phase diffusion and the dependence of the diffu-
+sion constant D on the ensemble size N, for parameters
+α = π/4, ε = 2.5. The results show that with good accu-
+racy, the law D ∼N −2 holds. This means that the diffu-
+sion constant decreases much more strongly with the sys-
+tem size than the variance of amplitude variations, which
+decreases in the supercritical regime as ∼N −1 [22, 31].
+We attribute this strong drop of the diffusion constant to
+weak chaos, to be discussed below.
+Above, we considered regular sampling, so that, for
+each N, there is a unique system. If, in contrast, one uses
+random sampling, then for each N there is an ensemble
+-3
+-2
+-1
+ 0
+ 1
+ 2
+ 3
+ 4
+ 0
+ 50000
+ 100000
+ 150000
+ 200000
+(a)
+Θ(t)
+time t
+N=100
+N=200
+ 0
+ 2
+ 4
+ 6
+ 8
+ 10
+ 12
+ 0
+ 100000
+ 200000
+(b)
+var(Δ Θ)
+T
+N=100
+N=200
+N=300
+-15
+-14
+-13
+-12
+-11
+-10
+-9
+ 4
+ 5
+ 6
+ 7
+(c)
+ln(D)
+ln(N)
+FIG. 1. Panel (a): Examples of phase variations Θ(t)−Ωt for
+N = 100, 200. Panel (b): examples of dependencies of the
+phase variance ⟨(Θ(T) −Θ(0) −ΩT)2⟩vs time lag T; these
+dependencies are linear with high accuracy, indicating normal
+diffusion of the phase. Panel (c): log-log plot of the diffusion
+constants D vs N (in the range 100 ≤N ≤1000). The best
+fit (green line) has slope 1.98.
+ 0
+ 0.1
+ 0.2
+ 0.3
+ 0.4
+ 0.5
+ 0.6
+ 0.7
+ 0.8
+ 0.9
+ 1
+10-5
+10-4
+10-3
+cumul distrib
+D(N/100)2
+100
+200
+300
+400
+600
+800
+FIG. 2.
+Cumulative distributions of the diffusion constant
+D for different system sizes, plotted for rescaled quantity
+D(N/100)2. Parameters are the same as in the case of regular
+sampling: ε = 2.5, α = π/4.
+of different systems with different values of the diffusion
+constant. To compare these constants at different N, we
+calculated the distribution functions of D at different N,
+using ≈1000 random samples for each N. Because the
+spread of diffusion constant at given N is large, we com-
+pare in Fig. 2 the distributions of log D. To check for the
+scaling ∼N −2, we depict the cumulative distributions
+of the rescaled diffusion constant D(N/100)2 (so that for
+the smallest size N = 100 there is no rescaling). One can
+see that the plots intersect nearly at the same point at
+the level 1/2, thus confirming the scaling D ∼N −2.
+Other examples of collective modes in ensembles of
+chaotic and regular units.
+The KS is a representative
+example of a synchronization transition, but one cannot
+expect its quantitative properties to be universally valid.
+Here we present evaluations of the coherence of the global
+mode for three other models (their equations are given
+in the Appendix). The first model that exhibits quali-
+tatively similar synchronization transition is the Morris-
+Lecar (ML) neuron model (8). A single neuron is in spik-
+ing oscillatory states, and upon a strong enough coupling,
+3
+-19
+-18
+-17
+-16
+-15
+-14
+-13
+ 4.5
+ 5
+ 5.5
+ 6
+ 6.5
+ 7
+(a)
+ln(D)
+ln(N)
+q=0.5
+q=0.4
+q=0.3
+q=0.2
+-16
+-15
+-14
+-13
+-12
+-11
+ 4.5
+ 5
+ 5.5
+(b)
+ln(D)
+ln(N)
+-9
+-8
+ 7.5
+ 8
+ 8.5
+ 9
+ 9.5
+ 10
+(c)
+ln(D)
+ln(N)
+FIG. 3. System size dependencies (log-log plots) of the global
+phase diffusion constant for three models discussed in the text
+and formulated in the Appendix. Panel (a): nonlinearly cou-
+pled SL oscillators (7), for four values of the frequency dis-
+tribution half-width q. The best fit slopes are (from top to
+bottom) 1.92, 1.9, 1.98, 2.03. Panel (b): coupled ML system
+of neural spiking (8). The slope of the best fit is 2.48. Panel
+(c): coupled chaotic Roessler systems (6). The best fit slope
+is 1.02.
+a global periodic field appears in an ensemble. Some neu-
+rons with natural frequencies close to that of the mean
+field are locked, others are not entrained; this regime is
+similar to the synchronous state in the KS model (1).
+Calculations of the phase diffusion constant of the mean
+field reveal that it decays more strongly with the ensem-
+ble size: D ∼N −2.48, see Fig. 3(b).
+A regime where some oscillators are locked by the mean
+field while others are not is not the only type of syn-
+chrony in large ensembles.
+There exists so-called par-
+tial synchronization [41–44] where no one unit is locked,
+and nevertheless there is a collective oscillating mode;
+see [15, 38] for an experimental observation in a set of
+electronic generators. As an example of such a type of
+synchrony, we use a globally nonlinear coupled system of
+SL oscillators (7). For this model, the scaling of the dif-
+fusion constant with the system size is nearly the same
+as for the KS model above: D ∼N −2, see Fig. 3(a)
+(best fits for different values of the distribution width of
+natural frequencies are in the range (1.92, 2.03).)
+Finally, we explored coherence properties of the col-
+lective mode for coupled chaotic oscillators.
+We took
+an ensemble of Roessler oscillators (6). Each oscillator
+possesses a funnel attractor with ill-defined phase; how-
+ever, the global mode is nearly periodic with well-defined
+phase, as has been shown in [45, 46]. Diffusion constant
+in this case scales like D ∼N −1, as shown in Fig. 3(c).
+We now explore why, in different cases, the diffusion
+constant of the global mode shows different dependence
+on the system size. Let us introduce the instantaneous
+frequency of the global mode (“global frequency”) de-
+fined as Ω(t) = ˙Θ(t).
+Because Θ is defined via mean
+fields, the process Ω(t) is also some kind of a mean
+field.
+For example, for the KS model (1),(2), one has
+Ω= (NR)−1 P
+k cos(φk−Θ)(ωk+εR P(Θ−φk−α)). We
+have found that in all considered examples the variance
+of the global frequency scales as var(Ω) ∼N −1. How-
+ever, it is not the variance of the stationary process Ω(t)
+that determines the diffusion constant, but, according to
+the Green-Kubo formula, the integral of the autocorre-
+lation function (or, in spectral representation, the level
+of the continuous component of the spectrum at zero fre-
+quency). For the decay of the autocorrelation function,
+one needs the deterministic ensemble to be chaotic. We
+have characterized this chaoticity by means of the largest
+Lyapunov exponent λ. For coupled chaotic Roessler sys-
+tems, this exponent practically does not depend on the
+system size N, which explains why the diffusion constant
+in this case scales like D ∼N −1, following the scaling of
+var(Ω). In all other cases, the Lyapunov exponent tends
+to zero in the thermodynamic limit, as has been observed
+also for the Kuramoto model [47, 48]. For the KS model
+(1) and for nonlinearly coupled SL oscillators (7) we have
+found λ ∼N −1, while for the ML systems (8) we have
+found λ ∼N −0.56. This qualitatively explains why the
+diffusion constant decays strongly in these situations: in
+addition to a “standard” N −1 law for the variance of the
+global frequency, the chaotic component of its variations
+also vanishes in the thermodynamic limit. We stress here
+that the largest Lyapunov exponent is only indirectly re-
+lated to the decay of correlations of the global frequency;
+in particular, the next example shows that in a chaotic
+ensemble, the diffusion constant can vanish identically.
+Symmetry transition and quenched diffusion in the Ku-
+ramoto model. Above we started with the KS model, and
+not with the “standard” Kuramoto model (i.e., Eq. (1)
+with α = 0). The reason is that the latter demonstrates
+rather nontrivial properties of coherence. Next, we show
+that the Kuramoto model with a regular sampling of fre-
+quencies possesses a symmetric state in which phase dif-
+fusion is quenched, and this state is stable over a certain
+range of parameters. This symmetric state has been men-
+tioned by Daido [22], without stability considerations, as
+a possible regime for corresponding symmetric initial con-
+ditions. Stability properties have been first discussed in
+[47, 49] and explored at small couplings in [50].
+For definiteness, we assume the number of units N =
+4
+2M to be even; for an odd N, a simple reformulation
+of the theory below is needed. We write the Kuramoto
+system as
+˙φk = ωk + ε(S cos φk −C sin φk),
+C = 1
+N
+N
+X
+j=1
+cos φj,
+S = 1
+N
+N
+X
+j=1
+sin φj
+(3)
+Furthermore, we assume that the frequencies are pairwise
+symmetric ωk = −ω−k. We introduce new variables
+um = φm −φ−m
+2
+, vm = φm + φ−m
+2
+, m = 1, . . . , M .
+In this variables the Kuramoto model (3) reads
+˙um = ωm −ε sin um(C cos vm + S sin vm) ,
+˙vm = ε cos um(S cos vm −C sin vm) ,
+C = M −1
+M
+X
+j=1
+cos uj cos vj, S = M −1
+M
+X
+j=1
+cos uj sin vj .
+One can easily check that v1 = . . . = vM = V = const
+is the invariant manifold of this system of equations, for
+arbitrary V . The arbitrariness of V reflects the invari-
+ance of the Kuramoto model with respect to a shift of
+all the phases. The complex mean field is represented
+through the introduced quantities as Z(t) = R(t)eiΘ(t) =
+C(t) + iS(t) and the instantaneous global frequency is
+Ω(t) = ˙Θ = ( ˙SC −˙CS)/(S2 + C2). On the other hand,
+on the symmetric manifold
+C = Q(t) cos V, S = Q(t) sin V, Q(t) = M −1
+M
+X
+j=1
+cos uj .
+Substituting this in the instantaneous frequency of the
+global mode, we obtain that on the symmetric manifold
+˙Ω= 0. This means that the variations of the global fre-
+quency vanish, and the diffusion is quenched.
+On the
+symmetric manifold, only the variables um vary, and in
+general their dynamics is chaotic. Existence of a sym-
+metric manifold corresponds to the well-known effect of
+complete synchronization of chaotic systems [3, 51, 52].
+According to the general theory of complete synchro-
+nization [3, 53], stability of the chaotic symmetric state is
+determined by the largest transversal Lyapunov exponent
+on the symmetric manifold. To calculate it, we assume a
+weak violation of symmetry vm = V + wm, which, after
+linearization in wm, leads to a system (where um(t) is a
+chaotic trajectory on the symmetric manifold)
+˙um = ωm −ε sin um
+1
+M
+M
+X
+j=1
+cos uj ,
+(4)
+˙wm = ε cos um
+1
+M
+M
+X
+j=1
+cos um(wj −wm) .
+(5)
+-0.01
+ 0
+ 0.01
+ 0.02
+ 0.03
+ 0.04
+ 0.05
+ 0.06
+ 1.4
+ 1.5
+ 1.6
+ 1.7
+ 1.8
+ 1.9
+ 2
+(a)
+λtr
+ε
+100
+200
+300
+400
+500
+600
+800
+1000
+ 1.6
+ 1.64
+ 1.68
+ 1.72
+ 1.76
+ 1.8
+ 1.84
+ 0
+ 0.005
+ 0.01
+ 0.015
+ 0.02
+ 0.025
+ 0.03
+ 0.035
+(b)
+ε
+1/N
+εR
+ελ
+FIG. 4. Panel (a): The transversal LE vs coupling parameter
+ε for several ensemble sizes N. Panel (b): critical value of cou-
+pling ε at which the transversal LE changes sign and the sym-
+metric manifold becomes stable (blue circles). Red squares:
+critical value of coupling at which a well-defined global mode
+with Rmin > 0.1 appears.
+One can see from Eq. (5) that there is always a uniform
+solution w1 = . . . = vM with zero Lyapunov exponent;
+this solution corresponds to a shift of the constant V and
+is not transversal. To calculate the transversal Lyapunov
+exponent, we thus set P
+j wj = 0.
+We
+have
+calculated
+the
+transversal
+LE
+λtr
+=
+limt→∞t−1 ln ||w(t)||/||w(0)|| for the Kuramoto model
+with regular sampled Gaussian distribution of frequen-
+cies, for a range of system sizes. The results are presented
+in Fig. 4. The values of the transversal LEs vary signif-
+icantly with the system size N, but the transition point
+ελ at which this exponent becomes negative only weakly
+depends on N, as is clear from panel (b), where the value
+of the coupling constant ελ at which the transversal Lya-
+punov exponent changes sign, is presented. In this panel,
+we also show the value of the coupling εR, starting from
+which the minimal value of the order parameter R over
+a long run becomes larger than 0.1, which we use as
+an indicator for the existence of a global mode with a
+well-defined phase. One can see that the curves cross at
+Ns ≈60. For smaller system sizes, the symmetric state
+becomes stable already in the state where the phase is
+ill-defined; thus, here, no regime with phase diffusion
+is observed. For N > Ns, there is a range of coupling
+constants εR < ε < ελ where the phase is well-defined
+and diffuses. With an increase of coupling strength, for
+ε > ελ, a symmetric state occurs with vanishing diffu-
+sion.
+The symmetric state with vanishing global phase dy-
+namics is destroyed if the symmetry of system (3) is bro-
+ken. We illustrate this in Fig. 5 with two types of symme-
+try breaking. In the first example (panel (a)), we take the
+5
+10-14
+10-12
+10-10
+10-8
+10-6
+10-4
+10-2
+10-10
+10-8
+10-6
+10-4
+10-2
+(a)
+Var(Ω)
+α
+N=100, ε=1.75
+N=100, ε=1.8
+N=200, ε=1.75
+N=200, ε=1.8
+10-8
+10-6
+10-4
+10-2
+10-4
+10-3
+10-2
+10-1
+(b)
+Var(Ω)
+δ
+N=100,ε=0.72
+N=100,ε=0.77
+N=200,ε=0.72
+N=200,ε=0.77
+FIG. 5. Panel (a): The variance of the global frequency vs.
+phase shift α in the KS system; for two values of coupling
+strength below and above the symmetry synchronization tran-
+sition.
+Panel (b): The variance of the global frequency vs
+asymmetry parameter δ of the Beta-distribution of frequen-
+cies in the Kuramoto model.
+same symmetric natural frequencies as above, but insert
+a small phase shift α to the coupling terms, making the
+KS system out of the Kuramoto system. In the second
+example (panel (b)), we illustrate the situation where the
+coupling is symmetric, but the set of natural frequencies
+is slightly skewed. Namely, we sample these frequencies
+regularly from the beta distribution B(3+δ, 3−δ) with a
+small skewness parameter δ. In both cases, the variance
+of the global frequency grows as the second power of the
+symmetry-breaking parameter.
+Conclusion. In this Letter, we explored finite-size in-
+duced coherence properties of populations of coupled os-
+cillators. The measure of coherence is the diffusion con-
+stant of the global mode’s phase.
+The results provide
+a new, richer scenario, complementing previous studies
+of the amplitude fluctuations and of phase diffusion in
+an ensemble of noisy units.
+First, the global phase is
+ill-defined prior to and in the vicinity of the synchroniza-
+tion transition; we used the condition that the global am-
+plitude is separated from zero to define a region where
+calculation of the phase diffusion makes sense. Second,
+in this domain we always observed normal diffusion at
+which the variance of the phase differences grows pro-
+portional to the time lag. Third, we found that if the
+interacting units are chaotic, then the diffusion scales
+D ∼N −1 with the same exponent as for coupled noisy
+units. The reason is that the effective disorder in the dy-
+namics does not disappear in the thermodynamic limit,
+and the scaling is consistent with central-limit-theorem-
+like arguments. Fourth, for coupled periodic oscillators,
+we have found much stronger decay of the diffusion con-
+stant with the system size, with powers ≈2 for the KS
+model and coupled SL oscillators, and ≈2.5 for coupled
+ML neurons. At the moment, it is not clear if there are
+different universality classes; one needs to consider more
+examples.
+The strong decay of the diffusion constant
+can be attributed to weak system-size-dependent chaos in
+these models, characterized by the largest Lyapunov ex-
+ponent that vanishes in the thermodynamic limit, which
+yields additional smallness to the usual ∼N −1 decays of
+mean field fluctuations. In addition to the general fea-
+tures above, we have shown that the standard Kuramoto
+model with a symmetric set of natural frequencies ex-
+hibits, at sufficiently strong couplings, a symmetric state
+in which the global phase remains constant in time. We
+expect this property to hold in other symmetric systems,
+such as coupled SL oscillators.
+Acknowledgments.
+S.I. acknowledges support from
+the MUR PRIN2022 project “Breakdown of ergodicity
+in classical and quantum many-body systems” (BEC-
+QuMB) Grant No. 20222BHC9Z.
+F.B. acknowledges support and hosting from the Univer-
+sity of Perpignan via Domitia (France).
+Appendix: Dynamical Models
+Here we describe dynamical models of globally coupled
+oscillators used in the main text.
+Coupled Roessler systems. This model has been stud-
+ied in Refs. [45, 46], it reads
+˙xk = −yk −zk + ε
+N
+X
+j
+xj ,
+˙yk = xk + ayk ,
+˙zk = b + (xk −c)zk .
+(6)
+We use parameters a = 0.25, b = 0.4, c = 8.5, at which
+each R¨ossler system has a funnel-type attractor, i.e., the
+oscillators have an ill-defined phase. For this system, we
+use the observables
+X(t) = 1
+N
+X
+k
+xk(t) ,
+Y (t) = 1
+N
+X
+k
+yk(t) .
+The two-dimensional embedding is (Y (t), X(t) + aY (t))
+because ˙Y = X + aY . These observables are normalized
+as Y →
+Y −⟨Y ⟩
+ST D(Y ) and the same for X + aY , to obtain a
+maximally circular embedding. Then the phase of the
+mean field is calculated as arctan
+Y
+X+aY . The diffusion
+constant vs N is presented in Fig. 3(c).
+Coupled Stuart-Landau (SL) oscillators. This model
+has been studied in Ref. [54]. The equations read
+˙ak = (1 + iωk)ak −|ak|2ak + (ε1 + iε2)A −η|A|2A,
+A = 1
+N
+X
+k
+ak .
+(7)
+Parameters are ε1 = ε2 = 3,
+η = 10.
+Note that
+the nonlinear mean field means many-body coupling
+(quadruplets), because A|A|2 = N −3 P
+jlm ajala∗
+m.
+In
+Fig. 3(a), we show diffusion constants vs N for a uniform
+distribution of natural frequencies in an interval (−q, q),
+for several values of q.
+Coupled Morris-Lecar neurons.
+The ML model is a
+two-dimensional system describing spiking neurons. It is
+formulated in terms of variables (V, n), where V is voltage
+and 0 ≤n ≤1 is the portion of open potassium chan-
+nels (the number of sodium channels m is taken from
+6
+its equilibrium value m∞at a given voltage.) We adopt,
+following [55], the following model of N synaptically cou-
+pled ML systems (k = 1, . . . , N; ⟨V ⟩= N −1 P
+k Vk):
+dVk
+dt = 1
+C
+ ε(⟨V ⟩−Vk) + Iext,k −gCam∞,k(Vk −VCa)−
+−gL(Vk −VL) −gKnk(Vk −VK)
+
+,
+dnk
+dt = (1 −nk)α(Vk) −nkβ(Vk).
+m∞,k = 1
+2
+
+1 + tanh(Vk −Va
+Vb
+)
+
+,
+α(V ) = ϕcosh(ξ/2)
+1 + e−2ξ ,
+β(V ) = ϕcosh(ξ/2)
+1 + e2ξ ,
+ξ = V −Vc
+Vd
+.
+(8)
+Inhomogeneity in the population is introduced by uni-
+formly distributed external currents 100 ≤Iext,k ≤130.
+Other parameters are C = 20; VK = −84; VL = −60;
+VCa = 120; gK = 8; gL = 2; gCa = 4.4; Vc = 2; Vd = 30;
+ϕ = 0.04. A synchronized state where approximately half
+of the oscillators are locked by the mean field is achieved
+at ε = 0.28, for this coupling, the diffusion constants are
+shown in Fig 3(b).
+∗pikovsky@uni-potsdam.de
+† franco.bagnoli@unifi.it
+‡ stefano.iubini@cnr.it
+[1] I. Bershtein, On fluctuations close to a periodic motion
+of a self-oscillating system, DAN SSSR 20, 11 (1938).
+[2] E. Rubiola, Phase noise and frequency stability in oscil-
+lators (Cambridge University Press, 2008).
+[3] A. Pikovsky, M. Rosenblum, and J. Kurths, Synchroniza-
+tion. A Universal Concept in Nonlinear Sciences. (Cam-
+bridge University Press, Cambridge, 2001).
+[4] J. A. Acebr´on, L. L. Bonilla, C. J. P. Vicente, F. Ritort,
+and R. Spigler, The Kuramoto model: A simple paradigm
+for synchronization phenomena, Rev. Mod. Phys. 77, 137
+(2005).
+[5] Y. Kuramoto, Self-entrainment of a population of cou-
+pled nonlinear oscillators, in International Symposium on
+Mathematical Problems in Theoretical Physics, edited by
+H. Araki (Springer Lecture Notes Phys., v. 39, New York,
+1975) p. 420.
+[6] Y. Kuramoto, Chemical Oscillations, Waves and Turbu-
+lence (Springer, Berlin, 1984).
+[7] E. Ott and T. M. Antonsen, Low dimensional behavior
+of large systems of globally coupled oscillators, CHAOS
+18, 037113 (2008).
+[8] H. Dietert, Stability and bifurcation for the Kuramoto
+model, Journal de Math´ematiques Pures et Appliqu´ees
+105, 451 (2016).
+[9] N. Nakagawa and Y. Kuramoto, From collective oscilla-
+tions to collective chaos in a globally coupled oscillator
+system, Physica D 75, 74 (1994).
+[10] M.-L. Chabanol, V. Hakim, and W.-J. Rappel, Collec-
+tive chaos and noise in the globally coupled complex
+Ginzburg-Landau equation, Physica D: Nonlinear Phe-
+nomena 103, 273 (1997).
+[11] P. Clusella and A. Politi, Between phase and amplitude
+oscillators, Physical Review E 99, 062201 (2019).
+[12] P. Clusella and A. Politi, Irregular collective dynamics in
+a kuramoto–daido system, Journal of Physics: Complex-
+ity 2, 014002 (2020).
+[13] I. Z. Kiss, Y. Zhai, and J. L. Hudson, Emerging coherence
+in a population of chemical oscillators, Science 296, 1676
+(2002).
+[14] Y. Zhai, I. Z. Kiss, P. A. Tass, and J. L. Hudson, Desyn-
+chronization of coupled electrochemical oscillators with
+pulse stimulations, Physical Review E—Statistical, Non-
+linear, and Soft Matter Physics 71, 065202 (2005).
+[15] A. A. Temirbayev, Y. D. Nalibayev, Z. Z. Zhanabaev,
+V. I. Ponomarenko, and M. Rosenblum, Autonomous and
+forced dynamics of oscillator ensembles with global non-
+linear coupling: An experimental study, Physical Review
+E—Statistical, Nonlinear, and Soft Matter Physics 87,
+062917 (2013).
+[16] P. Barbara, A. B. Cawthorne, S. V. Shitov, and C. J.
+Lobb, Stimulated emission and amplification in Joseph-
+son junction arrays, Phys. Rev. Lett. 82, 1963 (1999).
+[17] A. F. Taylor,
+P. Kapetanopoulos,
+B. J. Whitaker,
+R. Toth, L. Bull, and M. R. Tinsley, Clusters and switch-
+ers in globally coupled photochemical oscillators, Physi-
+cal Review Letters 100, 214101 (2008).
+[18] J. F. Totz, J. Rode, M. R. Tinsley, K. Showalter, and
+H. Engel, Spiral wave chimera states in large populations
+of coupled chemical oscillators, Nature Physics 14, 282
+(2018).
+[19] S. Mahler, A. A. Friesem, and N. Davidson, Experimental
+demonstration of crowd synchrony and first-order tran-
+sition with lasers, Physical Review Research 2, 043220
+(2020).
+[20] E. A. Martens, S. Thutupalli, A. Fourriere, and O. Hal-
+latschek, Chimera states in mechanical oscillator net-
+works, Proceedings of the National Academy of Sciences
+110, 10563 (2013).
+[21] P. Dallard, T. Fitzpatrick, A. Flint, A. Low, R. R. Smith,
+M. Willford, and M. Roche, London Millennium Bridge:
+pedestrian-induced lateral vibration, Journal of Bridge
+Engineering 6, 412 (2001).
+[22] H. Daido, Scaling behaviour at the onset of mutual en-
+trainment in a population of interacting oscillators, Jour-
+nal of Physics A: Mathematical and General 20, L629
+(1987).
+[23] H. Daido, Intrinsic fluctuations and a phase transition
+in a class of large populations of interacting oscillators,
+Journal of Statistical Physics 60, 753 (1990).
+[24] A. Pikovsky and S. Ruffo, Finite-size effects in a popu-
+lation of interacting oscillators, Phys. Rev. E 59, 1633
+(1999).
+[25] H. Hong, H. Park, and M. Choi, Collective synchroniza-
+tion in spatially extended systems of coupled oscillators
+with random frequencies, Physical Review E—Statistical,
+Nonlinear, and Soft Matter Physics 72, 036217 (2005).
+[26] H. Hong, H. Chat´e, H. Park, and L.-H. Tang, Entrain-
+ment transition in populations of random frequency os-
+cillators, Physical review letters 99, 184101 (2007).
+[27] E. J. Hildebrand, M. A. Buice, and C. C. Chow, Kinetic
+theory of coupled oscillators, Physical review letters 98,
+054101 (2007).
+[28] M. A. Buice and C. C. Chow, Correlations, fluctuations,
+7
+and stability of a finite-size network of coupled oscilla-
+tors, Physical Review E—Statistical, Nonlinear, and Soft
+Matter Physics 76, 031118 (2007).
+[29] L.-H. Tang, To synchronize or not to synchronize, that
+is the question: finite-size scaling and fluctuationeffects
+in the kuramoto model, Journal of Statistical Mechanics:
+Theory and Experiment 2011, P01034 (2011).
+[30] I. Nishikawa,
+K. Iwayama,
+G. Tanaka,
+T. Horita,
+and K. Aihara, Finite-size scaling in globally cou-
+pled phase oscillators with a general coupling scheme,
+Progress of Theoretical and Experimental Physics 2014,
+023A07 (2014), https://academic.oup.com/ptep/article-
+pdf/2014/2/023A07/9720445/ptu015.pdf.
+[31] H. Hong, H. Chat´e, L.-H. Tang, and H. Park, Finite-size
+scaling, dynamic fluctuations, and hyperscaling relation
+in the kuramoto model, Phys. Rev. E 92, 022122 (2015).
+[32] G. A. Gottwald, Finite-size effects in a stochastic Ku-
+ramoto model, Chaos: An Interdisciplinary Journal of
+Nonlinear Science 27 (2017).
+[33] F. Peter and A. Pikovsky, Transition to collective oscil-
+lations in finite Kuramoto ensembles, Phys. Rev. E 97,
+032310 (2018).
+[34] A. Suman and S. Jalan, Finite-size effect in kuramoto
+oscillators with higher-order interactions, Chaos: An In-
+terdisciplinary Journal of Nonlinear Science 34 (2024).
+[35] O. E. Omel’chenko and G. A. Gottwald, Mean-field
+approach to finite-size fluctuations in the Kuramoto-
+Sakaguchi
+model,
+arXiv
+preprint
+arXiv:2511.03700
+(2025).
+[36] F. Ginelli, K. A. Takeuchi, H. Chat´e, A. Politi, and
+A. Torcini, Chaos in the hamiltonian mean-field model,
+Phys. Rev. E 84, 066211 (2011).
+[37] T. R. Filho and B. Marcos, Classical Goldstone modes in
+long-range interacting systems, Physical Review E 102,
+032122 (2020).
+[38] A. A. Temirbayev, Z. Z. Zhanabaev, S. B. Tarasov, V. I.
+Ponomarenko, and M. Rosenblum, Experiments on os-
+cillator ensembles with global nonlinear coupling, Phys.
+Rev. E 85, 015204 (2012).
+[39] F. Peter and A. Pikovsky, Transition to collective oscil-
+lations in finite Kuramoto ensembles, Physical Review E
+97, 032310 (2018).
+[40] H. Sakaguchi and Y. Kuramoto, A soluble active rotator
+model showing phase transition via mutual entrainment,
+Prog. Theor. Phys. 76, 576 (1986).
+[41] C. van Vreeswijk, Partial synchronization in popula-
+tions of pulse-coupled oscillators, Phys. Rev. E 54, 5522
+(1996).
+[42] P. Mohanty and A. Politi, A new approach to partial
+synchronization in globally coupled rotators, J. Phys. A:
+Math. Gen. 39, L415 (2006).
+[43] M. Rosenblum and A. Pikovsky, Self-organized quasiperi-
+odicity in oscillator ensembles with global nonlinear cou-
+pling, Phys. Rev. Lett. 98, 064101 (2007).
+[44] A. Pikovsky and M. Rosenblum, Self-organized partially
+synchronous dynamics in populations of nonlinearly cou-
+pled oscillators, Physica D 238(1), 27 (2009).
+[45] A. Pikovsky, M. Rosenblum, and J. Kurths, Synchroniza-
+tion in a population of globally coupled chaotic oscilla-
+tors, Europhys. Lett. 34, 165 (1996).
+[46] A. Pikovsky and M. Rosenblum, A unified quantifica-
+tion of synchrony in globally coupled populations with
+the Wiener order parameter, Chaos: An Interdisciplinary
+Journal of Nonlinear Science 34, 053109 (2024).
+[47] O. V. Popovych, Y. L. Maistrenko, and P. A. Tass, Phase
+chaos in coupled oscillators, Phys. Rev. E 71, 065201
+(2005).
+[48] M. Carlu, F. Ginelli, and A. Politi, Origin and scaling of
+chaos in weakly coupled phase oscillators, Phys. Rev. E
+97, 012203 (2018).
+[49] Y. L. Maistrenko, O. Popovych, and P. Tass, Desynchro-
+nization and chaos in the Kuramoto model, in Dynamics
+of coupled map lattices and of related spatially extended
+systems, Lecture Notes in Physics, Vol. 671 (Springer,
+2005) pp. 285–306.
+[50] H. Chiba and D. Paz´o, Stability of an [N/2]-dimensional
+invariant torus in the Kuramoto model at small coupling,
+Physica D: Nonlinear Phenomena 238, 1068 (2009).
+[51] H. Fujisaka and T. Yamada, Stability theory of synchro-
+nized motion in coupled-oscillator systems, Prog. Theor.
+Phys. 69, 32 (1983).
+[52] A. S. Pikovsky, On the interaction of strange attractors,
+Z. Physik B 55, 149 (1984).
+[53] A. Pikovsky and A. Politi, Lyapunov Exponents. A Tool
+to Explore Complex Dynamics (Cambridge University
+Press, Cambridge, 2016).
+[54] M. Rosenblum and A. Pikovsky, Two types of quasiperi-
+odic partial synchrony in oscillator ensembles, Phys. Rev.
+E 92, 012919 (2015).
+[55] G. Tanaka, K. Morino, H. Daido, and K. Aihara, Dy-
+namical robustness of coupled heterogeneous oscillators,
+Physical review E 89, 052906 (2014).

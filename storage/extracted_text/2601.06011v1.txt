@@ -1,0 +1,1027 @@
+MNRAS 000, 1–10 (2025)
+Preprint 12 January 2026
+Compiled using MNRAS LATEX style file v3.2
+Simulations of collision and sloshing in the galaxy group NGC 5098/5096
+Richards P. Albuquerque1★, Gastão B. Lima Neto1, Rubens E. G. Machado2, Hugo V. Capelato3,
+Florence Durret4
+1Instituto de Astronomia, Geofísica e Ciências Atmosféricas, Universidade de São Paulo, Rua do Matão 1226, São Paulo, SP, Brazil
+2Departamento Acadêmico de Física, Universidade Tecnológica Federal do Paraná, Av. Sete de Setembro 3165, Curitiba, PR, Brazil
+3Núcleo de Astrofísica Teórica (NAT), Universidade Cidade de São Paulo, Rua Galvão Bueno, 868, 01506-000, São Paulo, Brazil
+4Sorbonne Université, CNRS, UMR 7095, Institut d’Astrophysique de Paris, 98bis Bd Arago, 75014, Paris, France
+Accepted 202X Month XX. Received 202X Month XX; in original form 202X Month XX
+ABSTRACT
+The study of galaxy groups is essential to understanding the evolutionary history of large-scale structures in the Universe.
+These dense environments have a significant impact on galaxy evolution, influencing their gas content, morphology, and star
+formation activity. In this work we analyse in detail the system NGC 5098/5096 composed of two galaxy groups. We performed
+hydrodynamical 𝑁-body simulations of a galaxy group collision aimed at reproducing the gas sloshing and surface brightness
+distribution observed in X-ray data. We conducted a detailed X-ray analysis and generated mock image Chandra observations
+from our simulations. The resulting corrected mock image surface brightness profiles show good agreement with the observed
+data. The relative line-of-sight velocity between NGC 5098 and NGC 5096 is 𝑣los = 700 km s−1, with a projected separation
+of 𝑑proj = 155 kpc, suggesting that the collision occurs nearly in the line-of-sight. Our simulations were performed with an
+inclination angle of 80◦in order to reproduce the dynamical constraints. We also find a correlation between the dark matter
+and intragroup light distributions when comparing the residual dark matter map with the intragroup light morphology. Our
+best-fitting model is consistent with these observational constraints and provides a plausible dynamical scenario for the current
+state of the NGC 5098 group interaction with NGC 5096.
+Key words:
+methods: numerical – galaxies: group: individual: NGC 5098, NGC 5096 – X-rays: individual: NGC 5098,
+NGC 5096
+1 INTRODUCTION
+Galaxy groups are gravitationally bound systems that contain more
+than half of all galaxies in the low redshift Universe (e.g. Eke et al.
+2004; Robotham et al. 2011). These systems arise naturally in a
+Universe where structure forms hierarchically, with the merging
+of smaller groups leading to increasingly massive halos, ultimately
+forming rich galaxy clusters (e.g. Press & Schechter 1974; Fakhouri
+& Ma 2010). Galaxy groups occupy an intermediate mass regime
+between massive elliptical galaxies (∼1012 M⊙) and galaxy clusters
+(∼1014 M⊙), and they host a substantial fraction of the baryonic
+matter in the local Universe (e.g. Fukugita et al. 1998; Eke et al.
+2004).
+In terms of their optical and physical properties, galaxy groups
+have been broadly classified into different categories: poor (or loose),
+compact, rich, and fossil groups (e.g. Lovisari et al. 2021). Dynami-
+cally, compact groups, being relatively isolated by definition (Hick-
+son 1982), tend to exhibit more relaxed configurations. Conversely,
+many galaxy groups are dynamically unrelaxed, undergoing mergers
+and interactions with infalling substructures (e.g. Tempel et al. 2017;
+O’Sullivan et al. 2019).
+In the X-ray band, many groups show extended diffuse emission of
+★E-mail: albuquerque.richards.astro@gmail.com
+the intragroup medium (hereafter IGM), with features such as surface
+brightness discontinuities, cold fronts, and sloshing (e.g. Markevitch
+& Vikhlinin 2007; Laganá et al. 2010; Gastaldello et al. 2013).
+The Chandra and XMM-Newton X-ray observatories have enabled
+detailed investigations of collision and merger dynamics in galaxy
+groups and clusters. By combining these observations with 𝑁-body
+hydrodynamical simulations we have better understood the origin
+of shock fronts (e.g. Springel & Farrar 2007; Donnert 2014; Moura
+et al. 2021; Albuquerque et al. 2024; Chadayammuri et al. 2024;
+Machado et al. 2024) and cold fronts (e.g. Markevitch & Vikhlinin
+2007; Roediger & Zuhone 2012; Gastaldello et al. 2013; Doubrawa
+et al. 2020; Machado et al. 2022) in the intragroup and intracluster
+medium.
+Galaxy groups and clusters often host active galactic nuclei (here-
+after AGN) with jets of relativistic plasma that emit synchrotron ra-
+diation (e.g. Tadhunter 2016). The mechanical feedback from AGN
+is an important mechanism for heating the gas in cool-core regions.
+Evidence of this mechanical feedback is found in the X-ray cavities
+observed in galaxy groups and clusters, on scales roughly coinci-
+dent with the lobes of the central radio galaxy (e.g. McNamara et al.
+2000). The radio plasma emitted by the AGN displaces the gas, gen-
+erating low-density bubbles that distribute energy to the surrounding
+medium. Such cavities or bubbles, identified by depressions in sur-
+face brightness, can extend to distances of up to 186 kpc, as observed
+© 2025 The Authors
+arXiv:2601.06011v1  [astro-ph.GA]  9 Jan 2026
+2
+Albuquerque et al.
+in the extreme case of the galaxy cluster MS 0735.6+7421 (Biava
+et al. 2021).
+Galaxy groups have shallower potential wells and thus lower mean
+temperatures than clusters. Therefore non-gravitational processes
+such as galactic winds, radiative cooling, and AGN feedback, play a
+more significant role in their evolution. In this environment, even a
+single massive galaxy falling into a group-scale halo with a nonzero
+impact parameter can perturb the IGM, inducing gas motions, trans-
+ferring angular momentum, and producing a spiral pattern in the
+IGM that also manifests as sloshing features.
+X-ray analyses of interacting galaxy groups (e.g. Xue et al. 2004;
+Kraft et al. 2006; Randall et al. 2009; Machacek et al. 2010;
+Gastaldello et al. 2013; O’Sullivan et al. 2014; Schellenberger et al.
+2023; Lima Neto et al. 2025) are relatively less common than in-
+teracting clusters due to their intrinsically lower luminosities. Since
+galaxy groups outnumber clusters (Tully 1987; Eke et al. 2004),
+understanding the range of collision and merger-driven effects on
+their gas and galaxy properties is essential for constructing accurate
+models of hierarchical structure formation.
+NGC 5098 is a galaxy group dominated by a central pair of ellipti-
+cal galaxies, NGC 5098a and NGC 5098b, identified by Ramella
+et al. (1995). Based on the SDSS1 data, the brightest galaxy is
+NGC 5098a, with absolute magnitudes of 𝑀𝐵= −21.131 and
+𝑀𝑉= −22.097, as computed by Randall et al. (2009), and redshift
+𝑧= 0.03606 ± 0.00001 (Lee et al. 2017). NGC 5098b has absolute
+magnitudes of 𝑀𝐵= −20.845 and 𝑀𝑉= −21.770, with redshift
+𝑧= 0.03744 ± 0.00008 (Miller et al. 2002). Their line-of-sight rel-
+ative velocity is 𝑣los = 413 km s−1, and their projected separation is
+𝑑proj = 27 kpc. Note that the western galaxy, NGC 5098a, hosts the
+extended radio source B2 1317+33, which has been detected at 1415,
+4850, and 4996 MHz (Fanti et al. 1977; Becker et al. 1991).
+At a projected distance of 155 kpc southwest of NGC 5098 lies
+the galaxy group NGC 5096 originally considered part of NGC 5098
+(e.g. Ramella et al. 1995) but already recognized as an independent
+sub-system by Mahdavi et al. (2005).
+As discussed by Lima Neto et al. (2025) (hereafter Paper I), the
+overall structure of NGC 5098 comprises two subsystems: i) a dom-
+inant group with mean redshift 𝑧= 0.03605 centred on NGC 5098a
+and having virial mass of 𝑀200 = (3.93 ± 0.28) × 1013 M⊙and ra-
+dius 𝑅200 = (0.69 ± 0.02) Mpc. This group comprises 82 galaxies
+to 𝑟< 18 mag; ii) a smaller group with mean redshift 𝑧= 0.03886
+distributed around the compact group NGC 5096 (Zandivarez et al.
+(2022)) with virial mass 𝑀200 = (0.17 ± 0.02) × 1013 M⊙and ra-
+dius 𝑅200 = (0.24 ± 0.01) Mpc (Paper I). This implies a mass ratio
+of approximately 1:20 for the NGC 5098/5096 system. This group
+has about 30 members (𝑟< 18 mag) from which five belong to the
+compact group itself.
+NGC 5098 was detected as an extended X-ray source in the ROSAT
+All-Sky Survey (RASS, Mahdavi et al. 2000). Subsequent studies of
+its global structure have been carried out with XMM-Newton (Xue
+et al. 2004) and, with higher spatial resolution, with Chandra (Sun
+et al. 2009), while Randall et al. (2009) used deep Chandra data
+obtained with the more sensitive detector ACIS-S3. They identified
+a spiral-like arm that can be interpreted as a sloshing pattern origi-
+nating at NGC 5098a and winding outward in a clockwise direction
+from northeast to west. They also reported X-ray cavities coincident
+with VLA 1.45 GHz radio emission, indicating recent AGN-driven
+outbursts.
+Analysis of the deep Chandra imaging by Randall et al. (2009)
+1 https://skyserver.sdss.org/dr18
+shows that there are 14 cavities detected within a radius of 22 kpc
+centred on the AGN, with an average cavity volume of 31 kpc3. Two
+of these cavities, located to the north and southeast of the central
+AGN, are spatially correlated with radio emission and, based on
+pressure estimates and their proximity to the AGN, are likely re-
+cent features. The other X-ray cavities, which show no correlation
+with radio emission, appear to be ghost cavities from previous AGN
+outbursts (Randall et al. 2009).
+In galaxy groups and clusters there is a low surface brightness
+stellar component, typically found in the surroundings of the brightest
+cluster galaxies and massive satellites. This diffuse light originates
+from stars stripped from galaxies through tidal interactions (Contini
+2021; Montes 2022). In this work, we refer to this component as
+the intracluster light (hereafter ICL). Recently our team conducted
+a detailed study of the ICL in NGC 5098 Paper I, in which we
+detected low surface brightness diffuse emission tracing past galaxy-
+galaxy interactions and also suggesting a past collision between the
+two galaxy groups, a hypothesis that was already suggested by the
+kinematical analysis that demonstrated the reality of the NGC 5096
+substructure.
+In the present work, we aim to model through hydrodynamical
+𝑁-body simulations the dynamical history of the possible interaction
+between the NGC 5098 and NGC 5096 groups. We also investigate
+the excesses in the dark matter distribution and compare them with
+our recent results on the ICL distribution Paper I, in order to test the
+recent suggestion (e.g. Montes & Trujillo 2019; Kluge et al. 2021)
+that the ICL component traces the properties of its host system,
+making it a potential tracer of the dark matter.
+This paper is organized as follows. In Section 2, we describe
+the simulation setup, including the initial conditions and the range
+of dynamical parameters explored. Section 3 presents the results
+for our best-fit scenario, beginning with a comparison between the
+observed and corrected mock Chandra emissivity maps, followed
+by a discussion of how variations in the initial conditions affect
+the sloshing signature. Finally, Section 5 summarizes our findings
+and provides concluding remarks. We assume a standard ΛCDM
+cosmology with ΩΛ = 0.73, Ωm = 0.27, and 𝐻0 = 70 km s−1 Mpc−1.
+2 SIMULATION SETUP
+In order to model the gas sloshing in NGC 5098 with tailored hy-
+drodynamic 𝑁-body simulations, we employed Gadget-4 (Springel
+et al. 2021). This galaxy group exhibits sloshing morphology and
+edge-like features in both the northeastern and southwestern regions
+(Randall et al. 2009), indicative of a past dynamical interaction.
+Therefore, a successful model must reproduce the observed sloshing
+signatures and recover the locations of these edge-like discontinu-
+ities.
+2.1 Initial conditions
+To model the initial conditions of both galaxy groups, we adopt
+analytical density profiles that are widely used in the literature to
+describe the dark matter and gas components in equilibrium. For the
+dark matter halo, we assume a Hernquist (1990) profile:
+𝜌h(𝑟) = 𝑀h
+2𝜋
+𝑎h
+𝑟(𝑟+ 𝑎h)3 ,
+(1)
+MNRAS 000, 1–10 (2025)
+Simulations of NGC 5098 group
+3
+where 𝑀h is the total dark matter mass and 𝑎h is the scale length.
+The corresponding cumulative mass profile is given by:
+𝑀(< 𝑟) = 𝑀h
+𝑟2
+(𝑟+ 𝑎h)2 .
+(2)
+This profile is particularly suitable for our simulations for several
+reasons. In the inner regions, its shape closely resembles that of the
+Navarro et al. (1996) (hereafter NFW) profile, which is widely used
+to model dark matter halos. However, the Hernquist profile features
+a steeper decline at large radii, resulting in a finite total mass. This
+property makes it especially advantageous for modelling isolated
+systems, as it eliminates the need for an artificial truncation of the
+halo.
+Given that both profiles are similar at small radii (𝑅≪𝑅200), we
+can approximate the Hernquist profile by the NFW profile in this
+regime, i.e., 𝜌h ≈𝜌NFW (Springel et al. 2005). This approximation
+implies a correspondence between the Hernquist scale length 𝑎h
+and the NFW scale radius 𝑟s, where the latter is defined through
+the concentration parameter 𝑐. To calculate the scale length for the
+Hernquist density profile, we used the following relation:
+𝑎h = 𝑟s
+√︂
+2
+h
+ln(1 + 𝑐) −
+𝑐
+1 + 𝑐
+i
+,
+(3)
+where 𝑟s is the scale radius of the NFW density profile. Using the
+concentration definition, we have 𝑟s = 𝑅200/𝑐. The concentration
+parameter 𝑐was estimated using the mass-concentration relation
+from Duffy et al. (2008):
+𝑐=
+6.71
+(1 + 𝑧)0.44
+
+𝑀200
+2 × 1012 ℎ−1 M⊙
+−0.091
+,
+(4)
+which depends only on the halo mass and redshift of the galaxy
+group.
+To model the density distribution of the IGM in our simulated
+galaxy groups collision, we adopted the analytical profile proposed
+by Dehnen (1993):
+𝜌g(𝑟) = (3 −𝛾)𝑀g
+4𝜋
+𝑎g
+𝑟𝛾(𝑟+ 𝑎g)4−𝛾,
+(5)
+where 𝑀g is the total gas mass, 𝑎g is the gas scale length, and 𝛾
+describes the inner power-law slope of the profile. When 𝛾= 0, the
+gas distribution exhibits a flat core (i.e., constant central density),
+whereas when 𝛾= 1 the gas distribution is similar to the Hernquist
+profile, characterized by a steep central density. In our simulations,
+we adopted 𝛾= 1 for NGC 5098, representing a cool-core galaxy
+group, and 𝛾= 0 for NGC 5096, corresponding to a non-cool-core
+system. This choice is consistent with previous X-ray studies (e.g.,
+Xue et al. 2004; Randall et al. 2009).
+For the initial condition, we assumed a gas fraction of 𝑓gas = 0.1, a
+typical value consistent with the mass range of galaxy groups (Laganá
+et al. 2013). Additionally, to determine the gas scale length 𝑎g, we
+used the total gas mass and the central gas density, which is defined as
+𝜌0 = 𝜇e𝑛e𝑚H, where 𝜇e = 1/(𝑋+ 𝑌
+2 ) is the mean molecular weight
+per electron. Assuming a primordial abundance with hydrogen and
+helium mass fractions 𝑋= 0.76 and𝑌= 0.24, we obtain 𝜇e ≈1.136.
+Here, 𝑛e is the electron number density, and 𝑚H is the proton mass.
+With these quantities, the scale length can be computed as:
+𝑎g = 3𝑀g
+4𝜋𝜌0
+.
+(6)
+Further details about the numerical implementation, including the
+velocity and temperature distributions, can be found in Machado &
+Table 1. Initial parameters for the simulated galaxy groups. Columns list the
+virial mass 𝑀200, concentration 𝑐, Hernquist scale length 𝑎ℎ, total gas mass
+𝑀gas, and Dehnen scale length 𝑎𝑔for NGC 5098 and NGC 5096.
+𝑀200 (1013 M⊙)
+𝑐
+𝑎h (kpc)
+𝑀gas (1012 M⊙)
+𝑎g (kpc)
+NGC 5098
+3.93
+5.2
+186
+6.34
+221
+NGC 5096
+0.17
+6.9
+54
+0.25
+76
+1.5 Mpc
+y
+x
+NGC 5098
+NGC 5096
+i
+vsub
+⃗
+Figure 1. Schematic representation of the collision in the orbital plane. Here,
+𝑣sub denotes the initial velocity of NGC 5096, and 𝑖is the angle of incidence
+between the line joining the two galaxy groups and the direction of the initial
+velocity vector.
+Lima Neto (2013). The initial conditions for NGC 5098/5096 were
+generated with the following numbers of particles for each of the
+galaxy groups: 𝑁DM = 106 for the dark matter and 𝑁gas = 106 for
+the gas, using the clustep2 code (Ruggiero & Lima Neto 2017). The
+specific parameters adopted for each galaxy group in the simulations
+are listed in Table 1.
+2.2 Orbital parameters
+To investigate the impact of varying individual parameters in our
+models on the outcome of the simulations, all simulations were
+initialized with the same initial separation. Since the sum of the
+virial radii (assuming equal to 𝑅200) of NGC 5098 and NGC 5096
+is 0.93 Mpc, we adopted an initial distance of 𝑑= 1.5 Mpc, which
+exceeds the combined virial radii and prevents significant overlap of
+dark matter and gas particles at the start of the simulations, 𝑡= 0.
+By fixing 𝑑, and consequently the initial gravitational potential en-
+ergy, we ensure that any differences in the dynamical evolution arise
+from changes in other initial parameters, such as the initial infall
+velocity and the angle of incidence. A schematic description of the
+orbital plane is shown in Fig. 1, where |®𝑣sub| = 𝑣inf is the initial infall
+velocity and 𝑖is the angle of incidence.
+To identify the best-fitting model, we ran several simulations, vary-
+ing the initial conditions as described above. In this work, we present
+only the five models that we consider essential for understanding the
+dynamics of the NGC 5098/5096 system. These models are crucial
+for elucidating the development of edge-like features and the slosh-
+ing morphology. The corresponding dynamical parameters are listed
+in Table 2.
+2 https://github.com/elvismello/clustep
+MNRAS 000, 1–10 (2025)
+4
+Albuquerque et al.
+Table 2. Dynamical parameters adopted for the initial conditions of each
+simulation model, including the initial separation 𝑑, infall velocity 𝑣inf, and
+angle of incidence 𝑖.
+Scenario
+𝑑[Mpc]
+𝑣inf [km s−1]
+𝑖[◦]
+1
+1.5
+650
+5
+2
+1.5
+650
+0
+3
+1.5
+650
+10
+4
+1.5
+950
+5
+5
+1.5
+350
+5
+2.3 X-ray data
+X-ray analyses of the system NGC 5098/5096 have been conducted by
+Xueet al. (2004); Mahdavietal. (2005);Randalletal. (2009), and Sun
+et al. (2009). In this work, we compare our simulation results to the
+observed X-ray emission in order to generate a comprehensive model
+that explains the dynamical state of NGC 5098/5096. To this end, we
+downloaded the three publicly available Chandra observations with
+ObsID 2231 (PI Fukazawa; 11 ks), ObsID 3352 (PI Ueda; 2.66 ks),
+and ObsID 6941 (PI Buote; 39.13 ks). These datasets were used to
+produce exposure-map-corrected images. For the construction of the
+radial surface brightness profile, we utilized only the two longer
+exposures (11 ks and 39.13 ks).
+We reprocessed the Chandra observations following standard pro-
+cedures using the CIAO software package and the calibration dataset
+CALDB provided by the Chandra X-ray Center (CXC)3. The script
+chandra_repro was used with default parameters to reprocess each
+observation individually. This task handles the creation of a bad pixel
+file, a redistribution matrix file (.rmf), and an ancillary response file
+(.arf), using the most up-to-date calibration files while taking the
+observation date into account. It then generates a new Type II PHA
+(pulse height amplitude) file, the event file that we will use in subse-
+quent analysis.
+We then combined the reprocessed event files using the
+merge_obs script to generate a single, broad-band (0.5–7.0 keV),
+exposure-map-corrected image. The exposure pointings are all dif-
+ferent, so this task effectively builds a mosaic image, taking into ac-
+count the different detectors and their response files. This final image
+was used as the basis for extracting radial surface brightness profiles
+in the northeastern and southwestern sectors of the NGC 5098 group.
+We did not subtract the background, since we will only use surface
+brightness ratios (we assume that after the exposure-map correction
+the background is flat in the area of the galaxy group).
+3 RESULTS
+In this work, we present a numerical model that indicates the
+NGC 5096 galaxy group as the perturber. Our best model reproduces
+the northeast ‘tail’ previously noted by Gastaldello et al. (2007),
+which can also be interpreted as the sloshing mentioned in Randall
+et al. (2009).
+In order to enable a more direct comparison between our simula-
+tion results and the observed X-ray emission, we generated realistic
+Chandra X-ray mock using the pyXSIM library4 (ZuHone & Hall-
+man 2016). pyXSIM implements the PHOX algorithm (Biffi et al.
+2012), which simulates photon lists from astrophysical plasma by
+3 https://cxc.harvard.edu/ciao/
+4 https://hea-www.cfa.harvard.edu/~jzuhone/pyxsim/
+Figure 2. Time evolution of the corrected mock Chandra X-ray emissivity in
+the 0.5 – 7.0 keV band for the interaction between NGC 5098 and NGC 5096.
+TSP refers to the time since pericentre passage. In the final frame, the circle
+indicates the position of the NGC 5096 galaxy group.
+convolving the simulated gas radiative properties with instrumen-
+tal responses. For each of our best-fitting and comparison models,
+we produced synthetic Chandra images in the 0.5 – 7.0 keV band,
+adopting an exposure time of 62.79 ks, comparable to the observed
+exposure of NGC 5098. We fixed the metallicity at 0.3 𝑍⊙and as-
+sumed a hydrogen column density of 𝑛H = 1.34 × 1020 cm−2 (HI4PI
+Collaboration et al. 2016) in the direction of NGC 5098. The resulting
+corrected mock images were used to extract surface brightness pro-
+files and to visually compare sloshing features, providing a consistent
+framework for evaluating the fidelity of our dynamical models.
+The time evolution of the corrected mock Chandra X-ray emissiv-
+ity in the 0.5 – 7.0 keV band throughout the interaction is presented
+in Fig. 2, with the last frame corresponding to the current dynami-
+cal stage of NGC 5098. The projected (three-dimensional) pericen-
+tric distance is approximately 30 kpc (50 kpc), and the time since
+pericentric (TSP) passage is estimated to be TSP = 0.50 Gyr. Due
+to the relatively small impact parameter, the recent passage of the
+NGC 5096 subgroup triggered gas sloshing in the core of the main
+group, producing features that are consistent with those observed in
+the X-ray data. The simulation is shown with an inclination of 80◦be-
+tween the orbital plane and the plane of the sky. This high inclination
+is required to reproduce the observed line-of-sight relative velocity
+between the galaxy groups. In our numerical experiment, NGC 5096
+passes to the east relative to the centre of NGC 5098.
+In the first panel of the time evolution of the emissivity shown
+in Fig. 2, it is possible to observe NGC 5096 approaching from the
+northeast. After the pericentric passage, in the second panel, the
+gas associated with NGC 5096 begins to become more diffuse. At
+TSP = 0.40 Gyr, the northeastern edge starts to form, and the gas
+from NGC 5096 becomes almost indistinguishable from the IGM of
+NGC 5098. At TSP = 0.50 Gyr, there is no emissivity peak associated
+with NGC 5096, as almost all of its gas has already been stripped by
+ram pressure effects. This result agrees with observations, in which
+MNRAS 000, 1–10 (2025)
+Simulations of NGC 5098 group
+5
+Figure 3. Left: Smoothed, exposure-map corrected image of the combined
+Chandra observations in the 0.5–7.0 keV band. The surface brightness edges
+identified by Randall et al. (2009) are marked in white. Right: Smoothed,
+corrected mock Chandra image in the same energy band, generated from the
+best-matching snapshot of our simulation. The simulated image successfully
+reproduces the main morphological features observed in the X-ray data, in-
+cluding the northeastern edge-like discontinuity associated with gas sloshing.
+NGC 5096 shows only a faint gas peak. The gas originally belonging
+to NGC 5096 was dispersed into the IGM after the collision with
+NGC 5098. Since galaxies follow the dark matter distribution, in our
+analysis the position of NGC 5096 is given by the dark matter peak.
+The edge-like discontinuities are formed immediately after the
+closest approach of the subgroup. As the perturber passes by, its
+gravitational influence displaces the cool, dense gas at the centre
+of NGC 5098 from the minimum of the gravitational potential and
+transfers angular momentum. This displacement triggers a character-
+istic sloshing motion of the intragroup gas, which manifests as sharp
+surface brightness discontinuities. These features initially emerge
+in the central regions and gradually propagate toward larger radii
+as the system continues to evolve dynamically. This process can be
+noted in the northeast edge region between TSP = 0.40 Gyr and
+TSP = 0.50 Gyr, as shown in Fig. 2.
+For both the Chandra and simulated data, we generated the expo-
+sure map in the broad band 0.5–7.0 keV. In Fig. 3, we compare the
+Chandra image, corrected by the exposure map, with the corrected
+mock Chandra image produced from the best-matching snapshot
+of our simulation. Each image has been smoothed for display pur-
+poses only. In this visual comparison, we note only a faint emission
+peak associated with NGC 5096 in the observations. In our simu-
+lated model, the gas originally belonging to NGC 5096 was almost
+completely stripped by the ram pressure effect, for this reason, no
+emissivity peak is present within the cyan circle. In the southwest
+sector, Randall et al. (2009) identified an edge region corresponding
+to a discontinuity in the brightness profile, which we highlighted
+with a semicircular white arc in the left panel of Fig. 3, labeled as
+SW Edge. We do not see this discontinuity in the corrected mock
+image. To the northeast, we observe the presence of a tail associated
+with the sloshing phenomenon, visible in both the observations and
+the simulation. This tail, labeled in Fig. 3, appears spontaneously as
+a result of the interaction between NGC 5098 and NGC 5096 af-
+ter the pericentric passage. The discontinuity in the northeast sector
+reported by Randall et al. (2009) was also highlighted with a semicir-
+cular line in the exposure-corrected Chandra image. In the corrected
+mock image, we can also see a discontinuity in that sector, although
+it appears at larger radii.
+The comparison between the observed and simulated surface
+brightness maps, shown in Fig. 3, indicates that the exposure-
+corrected mock image reproduces the main morphological features
+Figure 4. Regions used to measure the X-ray surface brightness overlaid on
+the exposure-corrected Chandra image. Each sector is centred on NGC 5098a
+and subdivided into 12 bins with logarithmic radial spacing. Source regions
+were masked out to extract only the diffuse gas surface brightness radial
+profile.
+seen in the X-ray data, including the X-ray excess in the northeastern
+region and the edge-like discontinuities to the northeast.
+We also compare the surface brightness profiles from the X-ray
+observations with those derived from our simulated mock Chandra
+image in the northeastern and southwestern sectors. By analyzing
+the X-ray surface brightness of NGC 5098 from the combined Chan-
+dra observations, edge-like discontinuities were identified and can
+be associated with gas sloshing. To compare our simulation results
+with the observations, we defined a sector similar, though not iden-
+tical, to that used in Randall et al. (2009). As shown in Fig. 4, we
+defined one sector to the northeast and another to the southwest,
+each subdivided into 12 bins. For the observations, the sectors were
+centred on NGC 5098a, which coincides with the central emission
+peak. In the simulations, we centred the sectors on the simulated
+emission peak as well, to enable a more consistent comparison. The
+ratio was computed between the excess in each semicircular annulus
+and the average surface brightness of the respective sector. This same
+procedure was applied to both the observed Chandra data and the
+simulated mock images.
+As shown in Fig. 5, the profile in the northeastern sector exhibits
+good agreement between the simulation and the observations, with
+the mean value of the simulated surface brightness lying within the
+observational uncertainties across the radial range. This agreement
+demonstrates that our model accurately reproduces the main features
+associated with the gas distribution, including the sloshing, observed
+in NGC 5098. In our simulation, the northeastern edge is detected
+at a radius of 93 kpc, which is larger than the previously reported
+value. In the X-ray data, we observe only a slight decrease in the
+mean surface brightness at 𝑟∼56 kpc. This result, derived from
+our simulated model, suggests that the sloshing northeastern edge in
+NGC 5098 may actually lie at a larger radius than the one detected
+by Randall et al. (2009).
+MNRAS 000, 1–10 (2025)
+6
+Albuquerque et al.
+101
+102
+r (kpc)
+10 1
+100
+SB
+SB
+Northeastern sector
+Observation
+Simulation
+101
+102
+r (kpc)
+10 1
+100
+SB
+SB
+Southwestern sector
+Figure 5. Top panel: Surface brightness profile extracted from the northeast-
+ern sector for both the X-ray observations and the corrected mock Chandra
+image. The vertical dashed line indicates the position of the surface brightness
+discontinuity reported by Randall et al. (2009) at 𝑟= 56 kpc, as highlighted
+in Fig. 3. The same extraction sector is applied over an extended radial range.
+Bottom panel: Same as the top panel, but for the southwestern sector. In this
+case, the vertical dashed line marks a radius of 𝑟= 31 kpc. The orange shaded
+area indicates the 1𝜎confidence interval.
+For the southwestern sector, the mean value of our numerical
+model does not fully reproduce the observed surface brightness pro-
+file at certain radii. In the central region, this difference can be
+attributed to the presence of an AGN at the centre of NGC 5098.
+AGN jets inject energy into the IGM, heating the surrounding gas
+and inflating cavities or bubbles that appear as localized depressions
+in the X-ray surface brightness. These bubble regions are located to
+the north and southeast of the AGN. In the NGC 5098 group, these
+regions also exhibit associated radio emission that fills the X-ray
+cavities (see Randall et al. 2009, for further details). When the con-
+fidence interval of the numerical model is taken into account, our
+best-fitting scenario remains consistent with the X-ray data, even in
+the absence of AGN feedback in the simulation.
+Since we simulate the gravitational hydrodynamical interaction
+of a binary collision between two galaxy groups without including
+galaxies or feedback processes, our model cannot capture possible
+AGN-driven features in the central region. Additionally, the model
+only recovers the edge feature reported at 𝑟= 31 kpc when the
+confidence interval is taken into account (see Fig. 5). This surface
+brightness drop could be associated with older AGN bubbles, as
+suggested by the cavitiesvisible nearthe southwesternedgein figure 3
+of Randall et al. (2009). Alternatively, a substructure with a galaxy-
+scale mass could also induce a discontinuity in that region of the
+group. Although there is a region between 𝑟= 20 kpc and 𝑟= 30 kpc
+where the surface brightness decreases slightly more gradually, this
+variation is not sufficient to be classified as an edge-like feature.
+Finally, from our best-fitting model, we obtained a line-of-sight rel-
+ative velocity of 716 km s−1, which is comparable to the ∼700 km s−1
+estimated from the observations, and a projected distance of 160 kpc,
+which is very close to the observed value of 155 kpc, further sup-
+porting the consistency of our model with the observational data.
+4 DISCUSSION
+In the following, we discuss the impact of variations in key pa-
+rameters, such as the initial infall velocity and the angle of in-
+cidence, which are directly related to the impact parameter of
+the NGC 5098/5096 system. We also explore the possibility that
+NGC 5098b may be responsible for the observed sloshing, and we
+compare the distribution of dark matter with the ICL to examine the
+alignment between these two components.
+4.1 Exploring the initial-condition parameter space
+We performed a systematic exploration of the initial-condition pa-
+rameter space to obtain a simulated model capable of explaining
+the dynamical scenario of NGC 5098. Our goal is to reproduce the
+sloshing signatures and obtain a surface brightness profile consistent
+with the observations. To this end, we tested different collision sce-
+narios by varying key parameters. In this section, we discuss some
+of the crucial parameters explored, which have a direct impact on the
+resulting numerical model.
+To enable a consistent comparison between models, we initialized
+each simulation with the same separation of 𝑑= 1.5 Mpc between
+the two galaxy groups, which exceeds the sum of their virial radii
+(𝑅200 of NGC 5098 plus 𝑅200 of NGC 5096). Ensuring that the initial
+distance is larger than the combined virial radii prevents any prema-
+ture gravitational overlap or tidal interaction at 𝑡= 0 Gyr. By fixing
+this initial separation, all models start with the same gravitational
+potential energy, allowing us to isolate and compare the effects of
+varying infall velocity and impact parameter.
+In the top panels of Fig. 6, we show two simulations at a fixed
+angle of incidence of 𝑖= 5◦, varying only the initial infall veloc-
+ity. Specifically, one run uses 𝑣inf = 350 km s−1 and the other uses
+𝑣inf = 950 km s−1. By keeping the separation fixed at 𝑑= 1.5 Mpc
+and the angle of incidence constant, any differences in the result-
+ing sloshing morphology can be directly attributed to the change in
+infall speed. This comparison highlights how sensitive the sloshing
+signature is to the galaxy groups relative velocity. Comparing both
+models, we find that lower initial infall velocities give the system
+more time to reach the expected projected separation, leading to a
+more developed sloshing pattern. For reference, a zero-energy orbit
+would have implied a relative velocity of 485 km s−1 in the initial
+conditions. This idealized estimate corresponds to the free-fall ve-
+locity of two point masses released from infinity. Thus, the different
+initial relative velocities in the simulations cover a range from 0.7 to
+2 of the free-fall velocity. Due to the relatively low gas temperature,
+the sound speed in the intracluster medium, in the regions of interest,
+is in the range 350–500 km s−1, which implies supersonic speeds,
+even more so at the pericentric passage.
+Since we fixed the total potential energy of the system, the 𝑣inf =
+350 km s−1 model begins with lower initial kinetic energy, resulting
+in a closer pericentric passage and an impact parameter 𝑏= 63 kpc.
+In this case, a clear X-ray brightness discontinuity appears in the
+northeastern sector. By contrast, the 𝑣inf = 950 km s−1 model, which
+results in 𝑏= 100 kpc, shows no such discontinuity. This difference is
+evident in Fig. 7, where the surface brightness profiles are compared.
+Specifically, at a radius of 118 kpc, the northeast brightness profile
+in the 𝑣inf = 350 km s−1 model shows a discontinuity. In the higher-
+velocity scenario, however, the brightness declines smoothly at larger
+radii, without forming a sharp edge.
+In Fig. 8, the left panel shows the trajectories of NGC 5096 for
+each scenario. Each collision scenario was run until the two groups
+reached a projected separation of approximately 150 kpc; we also
+MNRAS 000, 1–10 (2025)
+Simulations of NGC 5098 group
+7
+Figure 6. Top panels: Comparison between simulations initialized with dif-
+ferent infall velocities, keeping the initial angle of incidence of 5◦. Bot-
+tom panels: Comparison between simulations with a fixed infall velocity of
+650 km s−1 and varying the angle of incidence. Our best-fitting model, shown
+in Fig. 3, corresponds to 𝑣inf = 650 km s−1 and 𝑖= 5◦. All models are pro-
+jected assuming an inclination of 80◦between the orbital plane and the plane
+of the sky. The circle indicates the position of the NGC 5096 galaxy group.
+rotated the orbital plane to align NGC 5096 with its observed direc-
+tion in the plane of the sky. We estimate the impact parameter from
+the minimum three-dimensional separation between NGC 5098 and
+NGC 5096, which occurs at TSP = 0 Gyr. The middle panel presents
+the projected separation as a function of TSP; due to line-of-sight
+effects, the minimum projected distance may occur at TSP ≠0 Gyr.
+Turning to the southwestern sector, the mean value of the lower-
+velocity scenario exhibits a significant mismatch in the surface
+brightness profile, whereas the higher-velocity scenario more closely
+follows the observational trend, similar to our best-fitting model.
+However, when the confidence interval is taken into account, both
+models remain consistent with the observations. Nevertheless, we
+discard both collision scenarios due to their inconsistency with the
+observed line-of-sight relative velocity. For the 𝑣inf = 350 km s−1
+model, the line-of-sight relative velocity, after applying an incli-
+nation of 80◦between the orbital plane and the plane of the sky,
+is 𝑣los = 474 km s−1, which is lower than the ∼700 km s−1 in-
+ferred from observations. In contrast, the 𝑣inf = 950 km s−1 model
+yields 𝑣los = 962 km s−1, exceeding the expected value. Therefore,
+both scenarios fail to reproduce the kinematics of the NGC 5098
+system. Our best-fitting model, with 𝑣inf = 650 km s−1, produces
+𝑣los = 716 km s−1, which closely matches the observed velocity.
+Fixing the initial potential and kinetic energies, we varied the
+angle of incidence to 0◦and 10◦. For 𝑖= 0◦, the impact parameter is
+𝑏≈0 kpc, as shown by the dark gray points crossing the origin in the
+left panel of Fig. 8, where NGC 5098 is located. In this configuration,
+the line-of-sight relative velocity is 𝑣los = 522 km s−1, which is lower
+than the observed value. For 𝑖= 10◦, the impact parameter increases
+to 𝑏= 131 kpc, and we obtain 𝑣los = 683 km s−1. From a kinematic
+perspective, both configurations are able to reproduce the observed
+line-of-sight relative velocity of the NGC 5098 system.
+When comparing the surface brightness profiles in Fig. 7, the 𝑖=
+0◦model shows a brightness distribution that deviates significantly
+from the observations, even when the confidence interval is taken
+into account. Moreover, this model fails to reproduce the sloshing
+signature in the simulated mock Chandra emissivity map, as shown
+in Fig. 6. In contrast, the 𝑖= 10◦model provides a fit similar to
+our best-fitting case; however, it does not produce an edge in the
+northeastern sector.
+Overall, comparing our models, we find that collisions with smaller
+impact parameters are more effective at producing an edge-like fea-
+ture in the northeastern sector. Models with initial infall velocities
+below 𝑣inf = 350 km s−1 fail to reproduce the observed velocity and
+edge position, even when large inclination angles between the line
+of sight and the orbital plane are applied. For the NGC 5098/5096
+minor merger, with a mass ratio of 1:20, even head-on encounters
+with impact parameter 𝑏≈0 did not lead to any disruption of the
+cool core in the NGC 5098 galaxy group.
+4.2 NGC 5098b as an alternative perturber
+The sloshing arm detected by Randall et al. (2009) appears as an
+X-ray emission excess to the north of NGC 5098b, spiraling outward
+in a clockwise pattern. This sloshing feature was attributed to the
+gravitational influence of NGC 5098b on NGC 5098a, the domi-
+nant galaxy in the group. In our orbital interpretation, a clockwise
+spiral requires the perturber to have approached from the northeast.
+The two galaxies are separated by a projected distance of 27 kpc,
+and spectroscopic redshifts indicate a line-of-sight relative velocity
+difference of 𝑣los = 400 km s−1.
+To reproduce these observational constraints, we initialized a col-
+lision scenario in which NGC 5098b starts at a distance of 1.5 Mpc
+from NGC 5098a, varying both the initial infall velocity and the an-
+gle of incidence. We then rotated the system to match the observed
+projected separation and line-of-sight velocity at the best-fitting mo-
+ment. In this configuration, however, no tail formation was observed
+to the northeast of NGC 5098. The absence of a prominent slosh-
+ing feature suggests that NGC 5098b is unlikely to be the primary
+perturber of the NGC 5098/5096 system.
+As discussed in section 3, when the NGC 5096 galaxy group
+is instead considered as the main perturber, key features such as
+the tail morphology and the radial surface brightness profile are
+successfully reproduced. Therefore, although we cannot entirely rule
+out the possibility that NGC 5098b acted as the main perturber, our
+simulations indicate that this scenario is improbable.
+4.3 Comparison between dark matter distribution and
+intragroup light
+Some authors suggest (e.g. Montes & Trujillo 2019; Kluge et al.
+2021) that the ICL component typically aligns with host cluster
+properties, which makes it a potential dark matter tracer. Montes
+& Trujillo (2019) conducted morphological comparisons between
+ICL and dark matter, finding the ICL better than X-ray emission for
+tracing the total mass in central regions of Hubble Frontier Field clus-
+ters. Similarly, Alonso Asensio et al. (2020) using Cluster-EAGLE
+simulations confirm the correlation between ICL and total mass,
+despite radial density profiles showing mismatches.
+After obtaining a best-fitting collision scenario, we compare our
+simulation results with recent analyses of the ICL Paper I to check
+MNRAS 000, 1–10 (2025)
+8
+Albuquerque et al.
+101
+102
+10 1
+100
+SB
+SB
+Northeastern sector
+v=650 km s 1;  i=0
+101
+102
+v=650 km s 1;  i=10
+101
+102
+v=950 km s 1;  i=5
+101
+102
+v=350 km s 1;  i=5
+101
+102
+r (kpc)
+10 1
+100
+SB
+SB
+Southwestern sector
+Observation
+101
+102
+r (kpc)
+101
+102
+r (kpc)
+101
+102
+r (kpc)
+Figure 7. Surface brightness profiles extracted from the northeastern (top panels) and southwestern (bottom panels) sectors, for both the X-ray observations
+and the simulated mock Chandra images. Each column corresponds to a different collision scenario. In each panel, the blue lines represent the observed radial
+surface brightness profile, while the gray lines correspond to the different collision scenarios shown in Fig. 6. The gray shaded area indicates the 1𝜎confidence
+interval.
+0.2
+0.0
+0.2
+x (Mpc)
+0.2
+0.0
+0.2
+y (Mpc)
+Projected
+1.4
+0.7
+0.0
+0.7
+TSP (Gyr)
+0.0
+0.1
+0.2
+0.3
+dproj (Mpc)
+Projected
+v=650kms 1; i=5
+v=650kms 1; i=0
+v=650kms 1; i=10
+v=950kms 1; i=5
+v=350kms 1; i=5
+1.4
+0.7
+0.0
+0.7
+TSP (Gyr)
+0.0
+0.3
+0.6
+0.9
+d (Mpc)
+Plane of the orbit
+Figure 8. Comparison of the NGC 5096 trajectory and distance evolution for different models. Left panel: Projected trajectories, where NGC 5098 is represented
+by the red cross at the origin. Middle panel: Projected separation as a function of TSP, measured from the plane of the sky configuration. Right panel:
+Three-dimensional separation as a function of TSP. The best-fitting model is shown with orange points, while the other models are displayed in shades of gray.
+All projections assume an inclination of 80◦between the orbital plane and the plane of the sky.
+whether a correlation between dark matter and ICL also arises in our
+scenario. To this end, we compare the residual image of the simulated
+dark matter distribution with the observed ICL map.
+The top-left panel of Fig. 9 shows the simulated dark matter distri-
+bution. We adapted the parameters of the GALFIT code (Peng et al.
+2002) to fit a Nuker profile (Lauer et al. 1995) to the dark matter ha-
+los of both NGC 5098 and NGC 5096. The resulting GALFIT model
+is shown in the top-right panel. By subtracting this model from our
+best-fitting simulation, we obtain the residual image shown in the
+bottom-left panel. For comparison, the bottom-right panel presents
+the 𝑔-band residual image from Paper I, which highlights the ICL
+after stellar light subtraction.
+We identify an excess of dark matter to the northeast of NGC 5098,
+highlighted by a semicircular annulus, which spatially coincides with
+an enhancement of the ICL in the same region. Similarly, another
+slight excess is found to the southwest of NGC 5098, also aligned
+with an ICL overdensity. Additionally, an excess of dark matter is
+found to the southeast of NGC 5096; however, in this case, we are
+not certain whether it is comparable to the ICL in the same re-
+gion. This uncertainty arises because the diffuse light to the south of
+NGC 5096 may correspond to a tidal dwarf galaxy or to the remnant
+of a galaxy disrupted by tidal forces, as suggested by Paper I, and is
+not necessarily related to the NGC 5098/5096 interaction.
+Comparing the ICL morphology with the dark matter density in
+Fig. 9, we find a correlation between the two distributions, whose
+origin could be related to the NGC 5098/5096 interaction. However,
+the residual image derived from the dark matter distribution does not
+reproduce all the individual ICL features reported in Paper I.
+MNRAS 000, 1–10 (2025)
+Simulations of NGC 5098 group
+9
+Figure 9. The top-left panel shows our best-fitting model for the
+NGC 5098/5096 system, while the top-right panel presents a GALFIT-based
+model of both dark matter halos. The bottom panels compare the two: on the
+left, the residual map obtained by subtracting our best-fitting scenario from
+the GALFIT model; on the right, the 𝑔-band residual image after subtract-
+ing the stellar light models, highlighting the ICL within the white contours,
+adapted from Paper I.
+5 CONCLUSIONS
+We have conducted tailored hydrodynamic 𝑁-body simulations of
+the NGC 5098/5096 system aiming to reproduce the observed gas
+sloshing morphology in the NGC 5098 galaxy group. By systemat-
+ically exploring the initial condition parameter space, we identified
+the range of key parameters that best reproduce the observational
+data. Our results support the scenario in which NGC 5096 acts as the
+perturber, in agreement with our X-ray analysis. The main conclu-
+sions are summarized below:
+(i) NGC 5096 as the primary perturber. Our simulations
+demonstrate that even a relatively low mass substructure can trig-
+ger gas sloshing in an intermediate mass galaxy group. Attempts
+to reproduce the sloshing signature by placing the perturber at
+the location of NGC 5098b (27 kpc east) were unsuccessful. In-
+stead, adopting NGC 5096 as the perturber yields our best-fitting
+model, which reproduces the projected separation in the plane
+of the sky (𝑑proj = 160 kpc), the line-of-sight relative velocity
+(𝑣los = 716 km s−1), and the characteristic northeastern sloshing fea-
+ture. Although this idealized model does not include AGN feedback,
+whose jets can create cavities that depress the X-ray surface bright-
+ness, our simulated brightness profile still matches the observations
+in the southwestern sector when the confidence interval is taken into
+account.
+(ii) Sensitivity to impact parameter. Our comparison of col-
+lision scenarios reveals that smaller impact parameters more ef-
+fectively induce sloshing and generate edge-like discontinuities in
+the northeastern sector of NGC 5098. While a head-on collision
+(𝑏= 0 kpc) represents an extreme case, our best-fitting model re-
+quires an impact parameter of 𝑏= 50 kpc to reproduce the key
+morphological features of the northeastern edge. In contrast, when
+we fix the initial infall velocity at 𝑣inf = 650 km s−1 and increase
+the angle of incidence to 𝑖= 10◦, the resulting impact parameter
+(𝑏= 131 kpc) is too large to produce a clear edge-like feature in
+the northeast; however, sloshing motions remain evident in the gas
+distribution.
+(iii) Sensitivity to initial infall velocity. We tested three sce-
+narios with varying initial infall velocities. Models with 𝑣inf <
+350 km s−1 cannot reach the observed line-of-sight relative veloc-
+ity of ∼700 km s−1, even when high orbital inclinations are applied.
+On the other hand, models with 𝑣inf > 950 km s−1 produce line-
+of-sight relative velocities that exceed the observed value. We also
+explored lower inclination angles; in those cases, the sloshing feature
+in the northeastern sector does not have sufficient time to develop
+before the system reaches the observed projected separation.
+(iv) Intracluster light (ICL) comparison. In our collision sce-
+nario, we find that the residual dark matter distribution roughly fol-
+lows the same general morphology as observed in the ICL distribution
+obtained from observations. The diffuse light distribution in certain
+regions appears to be related to the NGC 5098/5096 interaction, al-
+though we were not able to reproduce all individual ICL features
+reported in previous analyses.
+Modelling galaxy groups in the literature is not common. This
+task is particularly challenging because even a single galaxy can
+perturb the IGM and non-gravitational processes such as AGN feed-
+back can generate cavities that complicate the interpretation of the
+collision scenario. Our work demonstrates that the gravitational in-
+teraction with NGC 5096 provides a coherent explanation for the
+sloshing features in NGC 5098. Future efforts incorporating AGN
+feedback and more complex group environments will further refine
+our understanding of gas dynamics in galaxy groups.
+ACKNOWLEDGEMENTS
+RPA acknowledges financial support from FAPESP under grant
+2024/13224-9. GBLN is grateful for the financial support from CNPq
+under grant 314528/2023-7 and FAPESP under grant 2024/06400-
+5. REGM acknowledges support from CNPq, through grants
+406908/2018-4 and 303425/2024-5, and from Fundação Araucária
+through grant PDI 346/2024 – NAPI Fenômenos Extremos do Uni-
+verso. F.D. acknowledges financial support from CNES.
+DATA AVAILABILITY
+The data supporting this article will be shared upon reasonable re-
+quest to the corresponding author.
+REFERENCES
+Albuquerque R. P., Machado R. E. G., Monteiro-Oliveira R., 2024, MNRAS,
+530, 2146
+Alonso Asensio I., Dalla Vecchia C., Bahé Y. M., Barnes D. J., Kay S. T.,
+2020, MNRAS, 494, 1859
+Becker R. H., White R. L., Edwards A. L., 1991, ApJS, 75, 1
+Biava N., et al., 2021, A&A, 650, A170
+Biffi V., Dolag K., Böhringer H., Lemson G., 2012, MNRAS, 420, 3545
+Chadayammuri U., Bogdán Á., Schellenberger G., ZuHone J., 2024, arXiv
+e-prints, p. arXiv:2407.03142
+Contini E., 2021, Galaxies, 9, 60
+Dehnen W., 1993, MNRAS, 265, 250
+MNRAS 000, 1–10 (2025)
+10
+Albuquerque et al.
+Donnert J. M. F., 2014, MNRAS, 438, 1971
+Doubrawa L., Machado R. E. G., Laganá T. F., Lima Neto G. B., Monteiro-
+Oliveira R., Cypriano E. S., 2020, MNRAS, 495, 2022
+Duffy A. R., Schaye J., Kay S. T., Dalla Vecchia C., 2008, MNRAS, 390, L64
+Eke V. R., et al., 2004, MNRAS, 348, 866
+Fakhouri O., Ma C.-P., 2010, MNRAS, 401, 2245
+Fanti C., Fanti R., Gioia I. M., Lari C., Parma P., Ulrich M. H., 1977, A&AS,
+29, 279
+Fukugita M., Hogan C. J., Peebles P. J. E., 1998, ApJ, 503, 518
+Gastaldello F., Buote D. A., Humphrey P. J., Zappacosta L., Bullock J. S.,
+Brighenti F., Mathews W. G., 2007, ApJ, 669, 158
+Gastaldello F., et al., 2013, ApJ, 770, 56
+HI4PI Collaboration et al., 2016, A&A, 594, A116
+Hernquist L., 1990, ApJ, 356, 359
+Hickson P., 1982, ApJ, 255, 382
+Kluge M., Bender R., Riffeser A., Goessl C., Hopp U., Schmidt M., Ries C.,
+2021, ApJS, 252, 27
+Kraft R. P., Jones C., Nulsen P. E. J., Hardcastle M. J., 2006, ApJ, 640, 762
+Laganá T. F., Andrade-Santos F., Lima Neto G. B., 2010, A&A, 511, A15
+Laganá T. F., Martinet N., Durret F., Lima Neto G. B., Maughan B., Zhang
+Y. Y., 2013, A&A, 555, A66
+Lauer T. R., et al., 1995, AJ, 110, 2622
+Lee G.-H., Hwang H. S., Sohn J., Lee M. G., 2017, ApJ, 835, 280
+Lima Neto G. B., Capelato H. V., Durret F., Machado R. E. G., 2025, A&A,
+697, A185
+Lovisari L., Ettori S., Gaspari M., Giles P. A., 2021, Universe, 7, 139
+Machacek M. E., O’Sullivan E., Randall S. W., Jones C., Forman W. R., 2010,
+ApJ, 711, 1316
+Machado R. E. G., Lima Neto G. B., 2013, MNRAS, 430, 3249
+Machado R. E. G., Laganá T. F., Souza G. S., Caproni A., Antas A. S. R.,
+Mello-Terencio E. A., 2022, MNRAS, 515, 581
+Machado R. E. G., Volert R. C., Albuquerque R. P., Monteiro-Oliveira R.,
+Lima Neto G. B., 2024, ApJ, 970, 160
+Mahdavi A., Böhringer H., Geller M. J., Ramella M., 2000, ApJ, 534, 114
+Mahdavi A., Finoguenov A., Böhringer H., Geller M. J., Henry J. P., 2005,
+ApJ, 622, 187
+Markevitch M., Vikhlinin A., 2007, Phys. Rep., 443, 1
+McNamara B. R., et al., 2000, ApJ, 534, L135
+Miller N. A., Ledlow M. J., Owen F. N., Hill J. M., 2002, AJ, 123, 3018
+Montes M., 2022, Nature Astronomy, 6, 308
+Montes M., Trujillo I., 2019, MNRAS, 482, 2838
+Moura M. T., Machado R. E. G., Monteiro-Oliveira R., 2021, MNRAS, 500,
+1858
+Navarro J. F., Frenk C. S., White S. D. M., 1996, ApJ, 462, 563
+O’Sullivan E., David L. P., Vrtilek J. M., 2014, MNRAS, 437, 730
+O’Sullivan E., Schellenberger G., Burke D. J., Sun M., Vrtilek J. M., David
+L. P., Sarazin C., 2019, MNRAS, 488, 2925
+Peng C. Y., Ho L. C., Impey C. D., Rix H.-W., 2002, AJ, 124, 266
+Press W. H., Schechter P., 1974, ApJ, 187, 425
+Ramella M., Geller M. J., Huchra J. P., Thorstensen J. R., 1995, AJ, 109,
+1458
+Randall S. W., Jones C., Markevitch M., Blanton E. L., Nulsen P. E. J., Forman
+W. R., 2009, ApJ, 700, 1404
+Robotham A. S. G., et al., 2011, MNRAS, 416, 2640
+Roediger E., Zuhone J. A., 2012, MNRAS, 419, 1338
+Ruggiero R., Lima Neto G. B., 2017, MNRAS, 468, 4107
+Schellenberger G., et al., 2023, ApJ, 948, 101
+Springel V., Farrar G. R., 2007, MNRAS, 380, 911
+Springel V., Di Matteo T., Hernquist L., 2005, MNRAS, 361, 776
+Springel V., Pakmor R., Zier O., Reinecke M., 2021, MNRAS, 506, 2871
+Sun M., Voit G. M., Donahue M., Jones C., Forman W., Vikhlinin A., 2009,
+ApJ, 693, 1142
+Tadhunter C., 2016, A&ARv, 24, 10
+Tempel E., Tuvikene T., Kipper R., Libeskind N. I., 2017, A&A, 602, A100
+Tully R. B., 1987, ApJ, 321, 280
+Xue Y. J., Böhringer H., Matsushita K., 2004, A&A, 420, 833
+Zandivarez A., Díaz-Giménez E., Taverna A., 2022, MNRAS, 514, 1231
+ZuHone J. A., Hallman E. J., 2016, pyXSIM: Synthetic X-ray observations
+generator, Astrophysics Source Code Library, record ascl:1608.002
+This paper has been typeset from a TEX/LATEX file prepared by the author.
+MNRAS 000, 1–10 (2025)
