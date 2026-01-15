@@ -7,3 +7,4 @@ pypdf
 requests
 duckduckgo-search
 beautifulsoup4
+arxiv
