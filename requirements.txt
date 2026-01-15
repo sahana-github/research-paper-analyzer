@@ -4,6 +4,7 @@ groq
 langchain
 langgraph
 pypdf
+pdfplumber
 requests
 duckduckgo-search
 beautifulsoup4
