@@ -4,7 +4,7 @@ Advanced multi-agent AI system that automatically discovers, analyzes, and compi
 
 ## 🚀 Live Demo
 
-[Try it here!]([your-url-will-go-here.streamlit.app](https://sahana-research-paper-analyzer.streamlit.app/))
+[Try it here!](https://sahana-research-paper-analyzer.streamlit.app/)
 
 ## ✨ Features
 
@@ -108,9 +108,10 @@ MIT License
 
 ## 👨‍💻 Author
 
-**Your Name**
-- GitHub: [@your-username](https://github.com/sahana-github)
-- LinkedIn: [your-profile]([https://linkedin.com/in/your-profile](https://www.linkedin.com/in/sahana-durgekar/))
+**Sahana**
+- GitHub: [@sahana-github](https://github.com/sahana-github)
+- LinkedIn: [sahana-durgekar](https://www.linkedin.com/in/sahana-durgekar/)
+
 
 ---
 
